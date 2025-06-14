@@ -1,13 +1,20 @@
-import { useState, useRef } from 'react'
-import { useCreateTaskMutation, useDeleteTaskMutation, useUpdateTaskMutation, useGetAllTasksQuery } from './rtk-query'
+import { useState, useRef, type MouseEventHandler } from 'react'
+import { useCreateTaskMutation,
+  useCompleteTaskMutation, 
+  useDeleteTaskMutation,
+  useGetAllTasksQuery,
+  useIncompleteTaskMutation, 
+  useUpdateTaskMutation } from './rtk-query'
 import type { Task } from './types'
 import './App.css'
 
 function App() {
   const { data, error, isLoading } = useGetAllTasksQuery()
   const [ createTaskMut ] = useCreateTaskMutation()
-  const [ updateTaskMut ] = useUpdateTaskMutation()
+  const [ completeTaskMut ] = useCompleteTaskMutation()
   const [ deleteTaskMut ] = useDeleteTaskMutation()
+  const [ incompleteTaskMut ] = useIncompleteTaskMutation()
+  const [ updateTaskMut ] = useUpdateTaskMutation()
   const [ editingId, setEditingId ] = useState<string | null>(null)
   const addInput = useRef<string | null>(null)
   const editInput = useRef<string | null>(null)
@@ -44,6 +51,14 @@ function App() {
     }
   }
 
+  function changeTaskState(id: string, incomplete: boolean) {
+    if (incomplete) {
+      incompleteTaskMut(id)
+    } else {
+      completeTaskMut(id)
+    }
+  }
+
   return (
     <>
       <div id="myDIV" className="header">
@@ -59,7 +74,8 @@ function App() {
       ) : data ? (
         <ul>
           {data.map(entry => (
-            <li key={entry.id} className="checked">
+            <li key={entry.id} className={(entry.completed ? 'checked' : '' )}>
+              <div className='check-area' onClick={() => { changeTaskState(entry.id, entry.completed) }}></div>
               { editingId == entry.id ? (
                 <input
                   type="text"

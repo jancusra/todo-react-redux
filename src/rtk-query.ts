@@ -38,6 +38,20 @@ export const todoListApi = createApi({
         method: 'DELETE'
       }),
       invalidatesTags: [{ type: 'Tasks', id: 'LIST' }]
+    }),
+    completeTask: build.mutation<Task, string>({
+      query: (id) => ({
+        url: `tasks/${id}/complete`,
+        method: 'POST'
+      }),
+      invalidatesTags: [{ type: 'Tasks', id: 'LIST' }]
+    }),
+    incompleteTask: build.mutation<Task, string>({
+      query: (id) => ({
+        url: `tasks/${id}/incomplete`,
+        method: 'POST'
+      }),
+      invalidatesTags: [{ type: 'Tasks', id: 'LIST' }]
     })
   })
 })
@@ -46,5 +60,7 @@ export const {
   useGetAllTasksQuery,
   useCreateTaskMutation,
   useUpdateTaskMutation,
-  useDeleteTaskMutation
+  useDeleteTaskMutation,
+  useCompleteTaskMutation,
+  useIncompleteTaskMutation
 } = todoListApi

@@ -116,3 +116,11 @@ input {
   margin-left: 50px;
   cursor: pointer;
 }
+
+.check-area {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 42px;
+  height: 45px;
+}
