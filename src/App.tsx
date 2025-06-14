@@ -1,11 +1,16 @@
-import { useRef } from 'react'
-import { useCreateTaskMutation, useGetAllTasksQuery } from './rtk-query'
+import { useState, useRef } from 'react'
+import { useCreateTaskMutation, useDeleteTaskMutation, useUpdateTaskMutation, useGetAllTasksQuery } from './rtk-query'
+import type { Task } from './types'
 import './App.css'
 
 function App() {
   const { data, error, isLoading } = useGetAllTasksQuery()
-  const [ createTask ] = useCreateTaskMutation()
+  const [ createTaskMut ] = useCreateTaskMutation()
+  const [ updateTaskMut ] = useUpdateTaskMutation()
+  const [ deleteTaskMut ] = useDeleteTaskMutation()
+  const [ editingId, setEditingId ] = useState<string | null>(null)
   const addInput = useRef<string | null>(null)
+  const editInput = useRef<string | null>(null)
 
   function onInputChange(e: React.ChangeEvent<HTMLInputElement>) {
     addInput.current = e.target.value
@@ -13,7 +18,29 @@ function App() {
 
   function onAdd() {
     if (addInput.current) {
-      createTask({ text: addInput.current })
+      createTaskMut({ text: addInput.current })
+    }
+  }
+
+  function deleteTask(id: string) {
+    if (id) {
+      deleteTaskMut(id)
+    }
+  }
+
+  function editById(task: Task) {
+    editInput.current = task.text
+    setEditingId(task.id)
+  }
+
+  function onEditChange(e: React.ChangeEvent<HTMLInputElement>) {
+    editInput.current = e.target.value
+  }
+
+  function onEditBlur() {
+    if (editingId && editInput.current) {
+      updateTaskMut({ id: editingId, text: editInput.current })
+      setEditingId(null)
     }
   }
 
@@ -32,7 +59,21 @@ function App() {
       ) : data ? (
         <ul>
           {data.map(entry => (
-            <li key={entry.id} className="checked">{entry.text}</li>
+            <li key={entry.id} className="checked">
+              { editingId == entry.id ? (
+                <input
+                  type="text"
+                  defaultValue={entry.text}
+                  onChange={onEditChange}
+                  onBlur={onEditBlur}
+                />
+              ) : (
+                <span onDoubleClick={() => { editById(entry) }}>{entry.text}</span>
+              )}
+              <button className="delete-task" onClick={() => { deleteTask(entry.id) }}>
+                <span>X</span>
+              </button>
+            </li>
           ))}
         </ul>
       ) : null}

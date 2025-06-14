@@ -3,8 +3,9 @@ export type Task = {
   text: string;
   completed: boolean;
   createdDate: number;
+  completedDate: number;
 }
 
-export type CreateTask = {
+export type CreateUpdateTask = {
   text: string;
 }

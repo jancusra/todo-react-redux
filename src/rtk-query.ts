@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
-import type { CreateTask, Task } from './types'
+import type { Task } from './types'
 
 export const todoListApi = createApi({
   reducerPath: 'todoListApi',
@@ -16,11 +16,26 @@ export const todoListApi = createApi({
             ]
           : [{ type: 'Tasks', id: 'LIST' }]
     }),
-    createTask: build.mutation<Task, CreateTask>({
+    createTask: build.mutation<Task, Partial<Task>>({
       query: (create_task) => ({
         url: 'tasks',
         method: 'POST',
         body: create_task
+      }),
+      invalidatesTags: [{ type: 'Tasks', id: 'LIST' }]
+    }),
+    updateTask: build.mutation<Task, Partial<Task>>({
+      query: (update_task) => ({
+        url: `tasks/${update_task.id}`,
+        method: 'POST',
+        body: { "text": update_task.text }
+      }),
+      invalidatesTags: [{ type: 'Tasks', id: 'LIST' }]
+    }),
+    deleteTask: build.mutation<string, string>({
+      query: (id) => ({
+        url: `tasks/${id}`,
+        method: 'DELETE'
       }),
       invalidatesTags: [{ type: 'Tasks', id: 'LIST' }]
     })
@@ -28,6 +43,8 @@ export const todoListApi = createApi({
 })
 
 export const {
+  useGetAllTasksQuery,
   useCreateTaskMutation,
-  useGetAllTasksQuery
+  useUpdateTaskMutation,
+  useDeleteTaskMutation
 } = todoListApi

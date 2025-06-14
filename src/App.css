@@ -39,7 +39,6 @@ ul li:hover {
 ul li.checked {
   background: #888;
   color: #fff;
-  text-decoration: line-through;
 }
 
 /* Add a "checked" mark when clicked on */
@@ -111,4 +110,9 @@ input {
 
 .addBtn:hover {
   background-color: #bbb;
+}
+
+.delete-task {
+  margin-left: 50px;
+  cursor: pointer;
 }
