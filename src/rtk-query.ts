@@ -19,7 +19,24 @@ export const todoListApi = createApi({
         method: 'POST',
         body: create_task
       }),
-      invalidatesTags: ['Tasks']
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        try {
+          const response = await queryFulfilled
+
+          dispatch(
+            todoListApi.util.updateQueryData(
+              'getAllTasks',
+              undefined,
+              (draft) => {
+                draft.push(response.data)
+                return draft
+              }
+            )
+          )
+        } catch {
+          dispatch(todoListApi.util.invalidateTags(['Tasks']))
+        }
+      }
     }),
     updateTask: build.mutation<Task, Partial<Task>>({
       query: (update_task) => ({
@@ -28,7 +45,7 @@ export const todoListApi = createApi({
         body: { "text": update_task.text }
       }),
       async onQueryStarted({ id, ...patch }, { dispatch, queryFulfilled }) {
-        const patchResult = dispatch(
+        dispatch(
           todoListApi.util.updateQueryData(
             'getAllTasks',
             undefined,
@@ -37,6 +54,7 @@ export const todoListApi = createApi({
               if (item) {
                 Object.assign(item, patch)
               }
+              return draft
             }
           )
         )
@@ -44,17 +62,35 @@ export const todoListApi = createApi({
         try {
           await queryFulfilled
         } catch {
-          patchResult.undo()
+          dispatch(todoListApi.util.invalidateTags([{ type: 'Tasks', id }]))
         }
-      },
-      invalidatesTags: (_result, _error, arg) => [{ type: 'Tasks', id: arg.id }]
+      }
     }),
     deleteTask: build.mutation<string, string>({
       query: (id) => ({
         url: `tasks/${id}`,
         method: 'DELETE'
       }),
-      invalidatesTags: ['Tasks']
+      async onQueryStarted(id, { dispatch, queryFulfilled }) {
+        dispatch(
+          todoListApi.util.updateQueryData(
+            'getAllTasks',
+            undefined,
+            (draft) => {
+              draft = draft.filter(function(item) {
+                return item.id !== id
+              })
+              return draft
+            }
+          )
+        )
+
+        try {
+          await queryFulfilled
+        } catch {
+          dispatch(todoListApi.util.invalidateTags(['Tasks']))
+        }
+      }
     }),
     completeTask: build.mutation<Task, string>({
       query: (id) => ({
@@ -71,6 +107,7 @@ export const todoListApi = createApi({
               if (item) {
                 item.completed = true
               }
+              return draft
             }
           )
         )
@@ -97,6 +134,7 @@ export const todoListApi = createApi({
               if (item) {
                 item.completed = false
               }
+              return draft
             }
           )
         )
