@@ -1,4 +1,4 @@
-import { useState, useRef, type MouseEventHandler } from 'react'
+import { useRef, useState } from 'react'
 import { useCreateTaskMutation,
   useCompleteTaskMutation, 
   useDeleteTaskMutation,
