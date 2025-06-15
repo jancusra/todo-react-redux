@@ -12,7 +12,7 @@ if (container) {
   root.render(
     <Provider store={store}>
       <App />
-    </Provider>,
+    </Provider>
   )
 } else {
   throw new Error(

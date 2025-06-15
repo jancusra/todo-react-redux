@@ -124,3 +124,23 @@ input {
   width: 42px;
   height: 45px;
 }
+
+.header2 {
+  padding: 10px 40px;
+  background-color: #009933;
+}
+
+.common-button {
+  display: inline-block;
+  padding: 3px 15px;
+}
+
+.selected {
+  color: white;
+  background-color: #555;
+}
+
+.gap {
+  display: inline-block;
+  width: 100px;
+}

@@ -15,6 +15,7 @@ function App() {
   const [ deleteTaskMut ] = useDeleteTaskMutation()
   const [ incompleteTaskMut ] = useIncompleteTaskMutation()
   const [ updateTaskMut ] = useUpdateTaskMutation()
+  const [ onlyCompleted, setOnlyCompleted ] = useState<boolean | null>(null)
   const [ editingId, setEditingId ] = useState<string | null>(null)
   const addInput = useRef<string | null>(null)
   const editInput = useRef<string | null>(null)
@@ -59,12 +60,41 @@ function App() {
     }
   }
 
+  function changeFilter(onlyCompleted: boolean | null) {
+    setOnlyCompleted(onlyCompleted)
+  }
+
+  function markVisibleAsCompleted() {
+    if (data) {
+      data.map(entry => {
+        if ((onlyCompleted === null || onlyCompleted === false) && !entry.completed) {
+          completeTaskMut(entry.id)
+        }
+      })
+    }
+  }
+
   return (
     <>
       <div id="myDIV" className="header">
         <h2>My To Do List</h2>
         <input type="text" id="myInput" placeholder="Title..." onChange={onInputChange} />
         <span className="addBtn" onClick={onAdd}>Add</span>
+      </div>
+      <div className="header2">
+        <button className={`common-button ${onlyCompleted === null ? 'selected' : ''}`} onClick={() => { changeFilter(null) }}>
+          All
+        </button>
+        <button className={`common-button ${onlyCompleted ? 'selected' : ''}`} onClick={() => { changeFilter(true) }}>
+          Completed
+        </button>
+        <button className={`common-button ${onlyCompleted === false ? 'selected' : ''}`} onClick={() => { changeFilter(false) }}>
+          Not completed
+        </button>
+        <div className='gap'></div>
+        <button className={"common-button"} onClick={markVisibleAsCompleted}>
+          Mark all visible as completed
+        </button>
       </div>
 
       {error ? (
@@ -73,24 +103,25 @@ function App() {
         <>Loading...</>
       ) : data ? (
         <ul>
-          {data.map(entry => (
-            <li key={entry.id} className={(entry.completed ? 'checked' : '' )}>
-              <div className='check-area' onClick={() => { changeTaskState(entry.id, entry.completed) }}></div>
-              { editingId == entry.id ? (
-                <input
-                  type="text"
-                  defaultValue={entry.text}
-                  onChange={onEditChange}
-                  onBlur={onEditBlur}
-                />
-              ) : (
-                <span onDoubleClick={() => { editById(entry) }}>{entry.text}</span>
-              )}
-              <button className="delete-task" onClick={() => { deleteTask(entry.id) }}>
-                <span>X</span>
-              </button>
-            </li>
-          ))}
+          {data.map(entry => {
+            if (onlyCompleted === null || (onlyCompleted && entry.completed) || (!onlyCompleted && entry.completed === false))
+              return <li key={entry.id} className={(entry.completed ? 'checked' : '' )}>
+                <div className='check-area' onClick={() => { changeTaskState(entry.id, entry.completed) }}></div>
+                { editingId == entry.id ? (
+                  <input
+                    type="text"
+                    defaultValue={entry.text}
+                    onChange={onEditChange}
+                    onBlur={onEditBlur}
+                  />
+                ) : (
+                  <span onDoubleClick={() => { editById(entry) }}>{entry.text}</span>
+                )}
+                <button className="delete-task" onClick={() => { deleteTask(entry.id) }}>
+                  <span>X</span>
+                </button>
+              </li>
+          })}
         </ul>
       ) : null}
     </>
