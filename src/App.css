@@ -130,6 +130,11 @@ input {
   background-color: #009933;
 }
 
+.header3 {
+  padding: 10px 40px;
+  background-color: #66b3ff;
+}
+
 .common-button {
   display: inline-block;
   padding: 3px 15px;
@@ -143,4 +148,9 @@ input {
 .gap {
   display: inline-block;
   width: 100px;
+}
+
+.gap2 {
+  display: inline-block;
+  width: 10px;
 }

@@ -74,6 +74,16 @@ function App() {
     }
   }
 
+  function deleteAllCompleted() {
+    if (data) {
+      data.map(entry => {
+        if (entry.completed) {
+          deleteTaskMut(entry.id)
+        }
+      })
+    }
+  }
+
   return (
     <>
       <div id="myDIV" className="header">
@@ -95,6 +105,19 @@ function App() {
         <button className={"common-button"} onClick={markVisibleAsCompleted}>
           Mark all visible as completed
         </button>
+        <div className='gap'></div>
+        <button className={"common-button"} onClick={deleteAllCompleted}>
+          Delete all completed
+        </button>
+      </div>
+      <div className="header3">
+        { data && 
+          <>
+            Completed tasks: 
+            <div className='gap2'></div>
+            { data.filter(item => item.completed).length }/{ data.length }
+          </>
+        }
       </div>
 
       {error ? (
