@@ -1,9 +1,38 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import type { BaseQueryApi, BaseQueryExtraOptions, BaseQueryFn, FetchArgs, RetryOptions } from '@reduxjs/toolkit/query/react'
 import type { Task } from './types'
+
+const baseQueryWithErrorHandling = async (args: string | FetchArgs, api: BaseQueryApi, extraOptions: BaseQueryExtraOptions<BaseQueryFn> & RetryOptions) => {
+  const baseQuery = fetchBaseQuery({ baseUrl: 'http://localhost:8080/' })
+
+  try {
+    // Attempt the request
+    const result = await baseQuery(args, api, extraOptions)
+
+    // Check for error status codes
+    if (result.error) {
+      // Handle specific error codes
+      if (result.error.status === 401) { }
+
+      // Log all errors
+      console.error('API error:', result.error)
+    }
+
+    return result
+  } catch (error) {
+    // Handle unexpected errors
+    return { 
+      error: { 
+        status: 'FETCH_ERROR', 
+        error: String(error) 
+      } 
+    }
+  }
+}
 
 export const todoListApi = createApi({
   reducerPath: 'todoListApi',
-  baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:8080/' }),
+  baseQuery: baseQueryWithErrorHandling,
   tagTypes: ['Tasks'],
   endpoints: (build) => ({
     getAllTasks: build.query<Task[], void>({
