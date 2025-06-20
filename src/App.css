@@ -3,7 +3,8 @@
 @config "../tailwind.config.js";
 
 
-button {
+button,
+input[type="checkbox"] {
   cursor: pointer;
 }
 

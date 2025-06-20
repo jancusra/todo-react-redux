@@ -17,7 +17,6 @@ function App() {
   const [ updateTaskMut ] = useUpdateTaskMutation()
   const [ onlyCompleted, setOnlyCompleted ] = useState<boolean | null>(null)
   const [ editingId, setEditingId ] = useState<string | null>(null)
-  const addInput = useRef<string | null>(null)
   const editInput = useRef<string | null>(null)
 
   function switchTheme() {
@@ -35,13 +34,14 @@ function App() {
     }
   }
 
-  function onInputChange(e: React.ChangeEvent<HTMLInputElement>) {
-    addInput.current = e.target.value
-  }
+  function addTask(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
 
-  function onAdd() {
-    if (addInput.current) {
-      createTaskMut({ text: addInput.current })
+    const formData = new FormData(e.target as HTMLFormElement)
+    const input_text = formData.get('todoin') as string
+
+    if (input_text) {
+      createTaskMut({ text: input_text })
     }
   }
 
@@ -113,10 +113,11 @@ function App() {
           </button>
       </header>
 
-      <form id="todo-form" className="mb-6 flex gap-2">
+      <form id="todo-form" className="mb-6 flex gap-2" onSubmit={addTask}>
         <input 
-          type="text" 
-          id="todo-input" 
+          id="todo-input"
+          name="todoin"
+          type="text"
           placeholder="Add a new task..." 
           className="flex-1 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-light dark:focus:ring-primary-dark"
           required />
@@ -126,6 +127,53 @@ function App() {
           Add
         </button>
       </form>
+
+      <div id="todo-list" className="space-y-2">
+        {error ? (
+          <div className="text-center py-4 text-gray-500 dark:text-gray-400">
+            No tasks yet. Add one above!
+          </div>
+        ) : isLoading ? (
+          <div className="text-center py-4 text-gray-500 dark:text-gray-400">
+            Loading ...
+          </div>
+        ) : data ? (
+          <>
+            {data.map(entry => {
+              if (onlyCompleted === null || (onlyCompleted && entry.completed) || (!onlyCompleted && entry.completed === false))
+                return <div key={entry.id} className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg shadow">
+                  <input
+                    className="h-5 w-5 rounded border-gray-300 text-primary-light dark:text-primary-dark focus:ring-primary-light dark:focus:ring-primary-dark"
+                    type="checkbox"
+                    checked={entry.completed}
+                    onChange={() => { 
+                      changeTaskState(entry.id, entry.completed) 
+                    }}
+                  />
+                  { editingId == entry.id ? (
+                    <input
+                      className='flex-1'
+                      type="text"
+                      defaultValue={entry.text}
+                      autoFocus={true}
+                      onChange={onEditChange}
+                      onBlur={onEditBlur}
+                    />
+                  ) : (
+                    <span className={`flex-1 cursor-text ${entry.completed ? 'line-through opacity-70' : ''}`} onDoubleClick={() => { editById(entry) }}>
+                      {entry.text}
+                    </span>
+                  )}
+                  <button className="text-red-500 hover:text-red-700 dark:hover:text-red-400" onClick={() => { deleteTask(entry.id) }}>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                    </svg>
+                  </button>
+                </div>
+              })}
+          </>
+        ) : null}
+      </div>
 
       {/*<div id="myDIV" className="header">
         <h2>My To Do List</h2>
