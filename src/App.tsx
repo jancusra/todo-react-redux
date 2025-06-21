@@ -75,8 +75,14 @@ function App() {
     }
   }
 
-  function changeFilter(onlyCompleted: boolean | null) {
-    setOnlyCompleted(onlyCompleted)
+  function changeFilter(filterState: string) {
+    if (filterState === "completed") {
+      setOnlyCompleted(true)
+    } else if (filterState === "not-completed") {
+      setOnlyCompleted(false)
+    } else {
+      setOnlyCompleted(null)
+    }
   }
 
   function markVisibleAsCompleted() {
@@ -89,7 +95,7 @@ function App() {
     }
   }
 
-  function deleteAllCompleted() {
+  function clearCompleted() {
     if (data) {
       data.map(entry => {
         if (entry.completed) {
@@ -100,7 +106,7 @@ function App() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-md">
+    <div className="container mx-auto px-2 py-8 max-w-md">
       <header className="flex justify-between items-center mb-8">
           <h1 className="text-2xl font-bold text-primary-light dark:text-primary-dark">Todo App</h1>
           <button id="theme-toggle" className="p-2 rounded-full bg-gray-200 dark:bg-gray-700" onClick={switchTheme}>
@@ -113,7 +119,7 @@ function App() {
           </button>
       </header>
 
-      <form id="todo-form" className="mb-6 flex gap-2" onSubmit={addTask}>
+      <form id="todo-form" className="mb-4 flex gap-2" onSubmit={addTask}>
         <input 
           id="todo-input"
           name="todoin"
@@ -127,6 +133,26 @@ function App() {
           Add
         </button>
       </form>
+
+      <div className="sm:hidden pb-4">
+        <label htmlFor="tabs" className="sr-only">Select option</label>
+        <select id="tabs" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" onChange={(e) => { changeFilter(e.target.value) }}>
+          <option value="all">All</option>
+          <option value="completed">Completed</option>
+          <option value="not-completed">Not completed</option>
+        </select>
+      </div>
+      <ul className="hidden pb-4 text-sm font-medium text-center text-gray-500 rounded-lg shadow-sm sm:flex dark:divide-gray-700 dark:text-gray-400">
+        <li className="w-full focus-within:z-10">
+          <a href="#" className={`inline-block w-full p-2 border-r border-gray-200 dark:border-gray-700 focus:outline-none rounded-s-lg dark:bg-gray-800 ${onlyCompleted === null ? 'bg-primary-light text-white dark:bg-primary-dark text-gray-900 dark:bg-gray-700 dark:text-white active' : ''}`} onClick={() => { changeFilter("all") }}>All</a>
+        </li>
+        <li className="w-full focus-within:z-10">
+          <a href="#" className={`inline-block w-full p-2 border-r border-gray-200 dark:border-gray-700 focus:outline-none dark:bg-gray-800 ${onlyCompleted ? 'bg-primary-light text-white dark:bg-primary-dark text-gray-900 dark:bg-gray-700 dark:text-white active' : ''}`} onClick={() => { changeFilter("completed") }}>Completed</a>
+        </li>
+        <li className="w-full focus-within:z-10">
+          <a href="#" className={`inline-block w-full p-2 border-s-0 border-gray-200 dark:border-gray-700 focus:outline-none rounded-e-lg dark:bg-gray-800 ${onlyCompleted === false ? 'bg-primary-light text-white dark:bg-primary-dark text-gray-900 dark:bg-gray-700 dark:text-white active' : ''}`} onClick={() => { changeFilter("not-completed") }}>Not completed</a>
+        </li>
+      </ul>
 
       <div id="todo-list" className="space-y-2">
         {error ? (
@@ -175,67 +201,18 @@ function App() {
         ) : null}
       </div>
 
-      {/*<div id="myDIV" className="header">
-        <h2>My To Do List</h2>
-        <input type="text" id="myInput" placeholder="Title..." onChange={onInputChange} />
-        <button className="p-2 rounded-full bg-gray-200 dark:bg-gray-700" onClick={onAdd}>Add</button>
-      </div>
-      <div className="header2">
-        <button className={`common-button ${onlyCompleted === null ? 'selected' : ''}`} onClick={() => { changeFilter(null) }}>
-          All
-        </button>
-        <button className={`common-button ${onlyCompleted ? 'selected' : ''}`} onClick={() => { changeFilter(true) }}>
-          Completed
-        </button>
-        <button className={`common-button ${onlyCompleted === false ? 'selected' : ''}`} onClick={() => { changeFilter(false) }}>
-          Not completed
-        </button>
-        <div className='gap'></div>
-        <button className={"common-button"} onClick={markVisibleAsCompleted}>
-          Mark all visible as completed
-        </button>
-        <div className='gap'></div>
-        <button className={"common-button"} onClick={deleteAllCompleted}>
-          Delete all completed
-        </button>
-      </div>
-      <div className="header3">
-        { data && 
-          <>
-            Completed tasks: 
-            <div className='gap2'></div>
-            { data.filter(item => item.completed).length }/{ data.length }
-          </>
-        }
-      </div>
+      { data && 
+        <div className="mt-6 text-sm text-gray-500 dark:text-gray-400 flex justify-between">
+          Completed: { data.filter(item => item.completed).length }/{ data.length }
 
-      {error ? (
-        <>Oh no, there was an error</>
-      ) : isLoading ? (
-        <>Loading...</>
-      ) : data ? (
-        <ul>
-          {data.map(entry => {
-            if (onlyCompleted === null || (onlyCompleted && entry.completed) || (!onlyCompleted && entry.completed === false))
-              return <li key={entry.id} className={(entry.completed ? 'checked' : '' )}>
-                <div className='check-area' onClick={() => { changeTaskState(entry.id, entry.completed) }}></div>
-                { editingId == entry.id ? (
-                  <input
-                    type="text"
-                    defaultValue={entry.text}
-                    onChange={onEditChange}
-                    onBlur={onEditBlur}
-                  />
-                ) : (
-                  <span onDoubleClick={() => { editById(entry) }}>{entry.text}</span>
-                )}
-                <button className="delete-task" onClick={() => { deleteTask(entry.id) }}>
-                  <span>X</span>
-                </button>
-              </li>
-          })}
-        </ul>
-      ) : null}*/}
+          <button id="mark-as-completed" className="hover:text-primary-light dark:hover:text-primary-dark" onClick={markVisibleAsCompleted}>
+            Mark as completed
+          </button>
+          <button id="clear-completed" className="hover:text-primary-light dark:hover:text-primary-dark" onClick={clearCompleted}>
+            Clear completed
+          </button>
+        </div>
+      }
     </div>
   )
 }
