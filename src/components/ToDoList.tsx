@@ -16,6 +16,9 @@ export type ToDoListProps = {
     allCompletedCanBeCleared?: boolean
 }
 
+/**
+ * component for a complete list of tasks and their management
+ */
 const ToDoList = (props: ToDoListProps) => {
     const { data, error, isLoading } = useGetAllTasksQuery()
     const [ completeTaskMut ] = useCompleteTaskMutation()

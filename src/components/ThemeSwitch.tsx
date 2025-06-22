@@ -5,6 +5,9 @@ export type ThemeSwitchProps = {
     darkAsDefault?: boolean
 }
 
+/**
+ * light/dark theme switching component
+ */
 const ThemeSwitch = (props: ThemeSwitchProps) => {
     const [ lightTheme, setLightTheme ] = useState<boolean>(true)
 

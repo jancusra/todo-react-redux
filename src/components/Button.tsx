@@ -8,6 +8,9 @@ export type ButtonProps = {
     onClick?: () => void
 }
 
+/**
+ * general button component
+ */
 const Button = (props: ButtonProps) => {
     return (
         <button

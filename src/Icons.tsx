@@ -1,5 +1,8 @@
 import React from "react"
 
+/**
+ * definition of a set of SVG images used as icons
+ */
 const Icons = () => {
     return (
         <div style={{ display: "none" }}>

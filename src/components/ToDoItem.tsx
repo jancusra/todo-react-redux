@@ -11,6 +11,9 @@ export type ToDoItemProps = {
     editNameByDoubleClickEnabled?: boolean
 }
 
+/**
+ * component for one item of a scheduled task and its modification
+ */
 const ToDoItem = (props: ToDoItemProps) => {
     const [ completeTaskMut ] = useCompleteTaskMutation()
     const [ deleteTaskMut ] = useDeleteTaskMutation()

@@ -6,6 +6,9 @@ export type TextBoxProps = {
     required?: boolean
 }
 
+/**
+ * component for input text
+ */
 const TextBox = (props: TextBoxProps) => {
     return (
         <input

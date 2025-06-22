@@ -10,6 +10,9 @@ export type SelectBoxProps = {
     onChange?: (value: string) => void
 }
 
+/**
+ * responsive selection component (Tabs on desktop & DropDown on mobile devices)
+ */
 const SelectBox = (props: SelectBoxProps) => {
     const [ selectedValue, setSelectedValue ] = useState<string | null>(props.items.length > 0 ? props.items[0].value : null)
 

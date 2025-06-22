@@ -2,6 +2,9 @@ import { configureStore } from '@reduxjs/toolkit'
 import { setupListeners } from '@reduxjs/toolkit/query'
 import { todoListApi } from './rtk-query'
 
+/**
+ * configure Redux store & RTK query api middleware
+ */
 export const store = configureStore({
   reducer: {
     // Add the generated reducer as a specific top-level slice

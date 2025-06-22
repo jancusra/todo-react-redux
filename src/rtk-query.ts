@@ -2,6 +2,9 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import type { BaseQueryApi, BaseQueryExtraOptions, BaseQueryFn, FetchArgs, RetryOptions } from '@reduxjs/toolkit/query/react'
 import type { Task } from './types'
 
+/**
+ * mechanism for catching errors in the API and displaying them in the console
+ */
 const baseQueryWithErrorHandling = async (args: string | FetchArgs, api: BaseQueryApi, extraOptions: BaseQueryExtraOptions<BaseQueryFn> & RetryOptions) => {
   const baseQuery = fetchBaseQuery({ baseUrl: 'http://localhost:8080/' })
 
@@ -21,20 +24,26 @@ const baseQueryWithErrorHandling = async (args: string | FetchArgs, api: BaseQue
     return result
   } catch (error) {
     // Handle unexpected errors
+    console.error('FETCH error:', error)
+
     return { 
       error: { 
         status: 'FETCH_ERROR', 
         error: String(error) 
-      } 
+      }
     }
   }
 }
 
+/**
+ * complete API definition for server communication, caching and optimistic updates
+ */
 export const todoListApi = createApi({
   reducerPath: 'todoListApi',
   baseQuery: baseQueryWithErrorHandling,
   tagTypes: ['Tasks'],
   endpoints: (build) => ({
+    // getting all tasks from the server and caching
     getAllTasks: build.query<Task[], void>({
       query: () => 'tasks',
       providesTags: (result) =>
@@ -42,12 +51,14 @@ export const todoListApi = createApi({
           ? [...result.map(({ id }) => ({ type: 'Tasks' as const, id })), 'Tasks']
           : ['Tasks']
     }),
+    // create a task
     createTask: build.mutation<Task, Partial<Task>>({
       query: (create_task) => ({
         url: 'tasks',
         method: 'POST',
         body: create_task
       }),
+      // optimistic cache update (or cache purge) at the start of the query
       async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
           const response = await queryFulfilled
@@ -67,6 +78,7 @@ export const todoListApi = createApi({
         }
       }
     }),
+    // update a task
     updateTask: build.mutation<Task, Partial<Task>>({
       query: (update_task) => ({
         url: `tasks/${update_task.id}`,
@@ -95,6 +107,7 @@ export const todoListApi = createApi({
         }
       }
     }),
+    // delete a task & optimistic cache update
     deleteTask: build.mutation<string, string>({
       query: (id) => ({
         url: `tasks/${id}`,
@@ -121,6 +134,7 @@ export const todoListApi = createApi({
         }
       }
     }),
+    // mark task as completed & optimistic cache update
     completeTask: build.mutation<Task, string>({
       query: (id) => ({
         url: `tasks/${id}/complete`,
@@ -148,6 +162,7 @@ export const todoListApi = createApi({
         }
       }
     }),
+    // mark task as incompleted & optimistic cache update
     incompleteTask: build.mutation<Task, string>({
       query: (id) => ({
         url: `tasks/${id}/incomplete`,
