@@ -8,11 +8,10 @@ import { useCreateTaskMutation,
 import type { Task } from './types'
 import Icons from "./Icons"
 import Button from './components/Button'
+import SelectBox from './components/SelectBox'
 import TextBox from './components/TextBox'
 import ThemeSwitch from './components/ThemeSwitch'
 import './App.css'
-
-//import iconPath from './test.svg'
 
 function App() {
   const { data, error, isLoading } = useGetAllTasksQuery()
@@ -115,25 +114,13 @@ function App() {
           className="px-4 py-2 bg-primary-light dark:bg-primary-dark text-white rounded-lg hover:opacity-90 transition-opacity" />
       </form>
 
-      <div className="sm:hidden pb-4">
-        <label htmlFor="tabs" className="sr-only">Select option</label>
-        <select id="tabs" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" onChange={(e) => { changeFilter(e.target.value) }}>
-          <option value="all">All</option>
-          <option value="completed">Completed</option>
-          <option value="not-completed">Not completed</option>
-        </select>
-      </div>
-      <ul className="hidden pb-4 text-sm font-medium text-center text-gray-500 rounded-lg shadow-sm sm:flex dark:divide-gray-700 dark:text-gray-400">
-        <li className="w-full focus-within:z-10">
-          <a href={void(0)} className={`inline-block w-full p-2 border-r border-gray-200 dark:border-gray-700 focus:outline-none rounded-s-lg dark:bg-gray-800 ${onlyCompleted === null ? 'bg-primary-light text-white dark:bg-primary-dark text-gray-900 dark:bg-gray-700 dark:text-white active' : ''}`} onClick={() => { changeFilter("all") }}>All</a>
-        </li>
-        <li className="w-full focus-within:z-10">
-          <a href={void(0)} className={`inline-block w-full p-2 border-r border-gray-200 dark:border-gray-700 focus:outline-none dark:bg-gray-800 ${onlyCompleted ? 'bg-primary-light text-white dark:bg-primary-dark text-gray-900 dark:bg-gray-700 dark:text-white active' : ''}`} onClick={() => { changeFilter("completed") }}>Completed</a>
-        </li>
-        <li className="w-full focus-within:z-10">
-          <a href={void(0)} className={`inline-block w-full p-2 border-s-0 border-gray-200 dark:border-gray-700 focus:outline-none rounded-e-lg dark:bg-gray-800 ${onlyCompleted === false ? 'bg-primary-light text-white dark:bg-primary-dark text-gray-900 dark:bg-gray-700 dark:text-white active' : ''}`} onClick={() => { changeFilter("not-completed") }}>Not completed</a>
-        </li>
-      </ul>
+      <SelectBox 
+          items={[
+            { value: "all", text: "All" },
+            { value: "completed", text: "Completed" },
+            { value: "not-completed", text: "Not completed" }
+          ]}
+          onChange={changeFilter} />
 
       <div id="todo-list" className="space-y-2">
         {error ? (
@@ -150,7 +137,7 @@ function App() {
               if (onlyCompleted === null || (onlyCompleted && entry.completed) || (!onlyCompleted && entry.completed === false))
                 return <div key={entry.id} className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg shadow">
                   <input
-                    className="h-5 w-5 rounded border-gray-300 text-primary-light dark:text-primary-dark focus:ring-primary-light dark:focus:ring-primary-dark"
+                    className="h-5 w-5 rounded border-gray-300 text-primary-light dark:text-primary-dark focus:ring-primary-light dark:focus:ring-primary-dark accent-primary-light dark:accent-primary-dark"
                     type="checkbox"
                     checked={entry.completed}
                     onChange={() => { 
