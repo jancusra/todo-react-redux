@@ -6,7 +6,13 @@ import { useCreateTaskMutation,
   useIncompleteTaskMutation, 
   useUpdateTaskMutation } from './rtk-query'
 import type { Task } from './types'
+import Icons from "./Icons"
+import Button from './components/Button'
+import TextBox from './components/TextBox'
+import ThemeSwitch from './components/ThemeSwitch'
 import './App.css'
+
+//import iconPath from './test.svg'
 
 function App() {
   const { data, error, isLoading } = useGetAllTasksQuery()
@@ -18,21 +24,6 @@ function App() {
   const [ onlyCompleted, setOnlyCompleted ] = useState<boolean | null>(null)
   const [ editingId, setEditingId ] = useState<string | null>(null)
   const editInput = useRef<string | null>(null)
-
-  function switchTheme() {
-    const html = document.documentElement
-    const themeIconLight = document.getElementById('theme-icon-light')
-    const themeIconDark = document.getElementById('theme-icon-dark')
-    html.classList.toggle('dark')
-          
-    if (html.classList.contains('dark')) {
-      themeIconLight!.classList.add('hidden')
-      themeIconDark!.classList.remove('hidden')
-    } else {
-      themeIconLight!.classList.remove('hidden')
-      themeIconDark!.classList.add('hidden')
-    }
-  }
 
   function addTask(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -109,29 +100,19 @@ function App() {
     <div className="container mx-auto px-2 py-8 max-w-md">
       <header className="flex justify-between items-center mb-8">
           <h1 className="text-2xl font-bold text-primary-light dark:text-primary-dark">Todo App</h1>
-          <button id="theme-toggle" className="p-2 rounded-full bg-gray-200 dark:bg-gray-700" onClick={switchTheme}>
-              <svg id="theme-icon-light" xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 hidden" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clipRule="evenodd" />
-              </svg>
-              <svg id="theme-icon-dark" xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
-              </svg>
-          </button>
+          <ThemeSwitch darkAsDefault={true} />
       </header>
 
       <form id="todo-form" className="mb-4 flex gap-2" onSubmit={addTask}>
-        <input 
-          id="todo-input"
+        <TextBox 
           name="todoin"
-          type="text"
-          placeholder="Add a new task..." 
           className="flex-1 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-light dark:focus:ring-primary-dark"
-          required />
-        <button 
-          type="submit" 
-          className="px-4 py-2 bg-primary-light dark:bg-primary-dark text-white rounded-lg hover:opacity-90 transition-opacity">
-          Add
-        </button>
+          placeholder="Add a new task ..."
+          required={true} />
+        <Button 
+          type="submit"
+          innerText="Add"
+          className="px-4 py-2 bg-primary-light dark:bg-primary-dark text-white rounded-lg hover:opacity-90 transition-opacity" />
       </form>
 
       <div className="sm:hidden pb-4">
@@ -144,13 +125,13 @@ function App() {
       </div>
       <ul className="hidden pb-4 text-sm font-medium text-center text-gray-500 rounded-lg shadow-sm sm:flex dark:divide-gray-700 dark:text-gray-400">
         <li className="w-full focus-within:z-10">
-          <a href="#" className={`inline-block w-full p-2 border-r border-gray-200 dark:border-gray-700 focus:outline-none rounded-s-lg dark:bg-gray-800 ${onlyCompleted === null ? 'bg-primary-light text-white dark:bg-primary-dark text-gray-900 dark:bg-gray-700 dark:text-white active' : ''}`} onClick={() => { changeFilter("all") }}>All</a>
+          <a href={void(0)} className={`inline-block w-full p-2 border-r border-gray-200 dark:border-gray-700 focus:outline-none rounded-s-lg dark:bg-gray-800 ${onlyCompleted === null ? 'bg-primary-light text-white dark:bg-primary-dark text-gray-900 dark:bg-gray-700 dark:text-white active' : ''}`} onClick={() => { changeFilter("all") }}>All</a>
         </li>
         <li className="w-full focus-within:z-10">
-          <a href="#" className={`inline-block w-full p-2 border-r border-gray-200 dark:border-gray-700 focus:outline-none dark:bg-gray-800 ${onlyCompleted ? 'bg-primary-light text-white dark:bg-primary-dark text-gray-900 dark:bg-gray-700 dark:text-white active' : ''}`} onClick={() => { changeFilter("completed") }}>Completed</a>
+          <a href={void(0)} className={`inline-block w-full p-2 border-r border-gray-200 dark:border-gray-700 focus:outline-none dark:bg-gray-800 ${onlyCompleted ? 'bg-primary-light text-white dark:bg-primary-dark text-gray-900 dark:bg-gray-700 dark:text-white active' : ''}`} onClick={() => { changeFilter("completed") }}>Completed</a>
         </li>
         <li className="w-full focus-within:z-10">
-          <a href="#" className={`inline-block w-full p-2 border-s-0 border-gray-200 dark:border-gray-700 focus:outline-none rounded-e-lg dark:bg-gray-800 ${onlyCompleted === false ? 'bg-primary-light text-white dark:bg-primary-dark text-gray-900 dark:bg-gray-700 dark:text-white active' : ''}`} onClick={() => { changeFilter("not-completed") }}>Not completed</a>
+          <a href={void(0)} className={`inline-block w-full p-2 border-s-0 border-gray-200 dark:border-gray-700 focus:outline-none rounded-e-lg dark:bg-gray-800 ${onlyCompleted === false ? 'bg-primary-light text-white dark:bg-primary-dark text-gray-900 dark:bg-gray-700 dark:text-white active' : ''}`} onClick={() => { changeFilter("not-completed") }}>Not completed</a>
         </li>
       </ul>
 
@@ -190,11 +171,11 @@ function App() {
                       {entry.text}
                     </span>
                   )}
-                  <button className="text-red-500 hover:text-red-700 dark:hover:text-red-400" onClick={() => { deleteTask(entry.id) }}>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
-                    </svg>
-                  </button>
+                  <Button 
+                    type={undefined}
+                    className="text-red-500 hover:text-red-700 dark:hover:text-red-400"
+                    iconName="remove-bin"
+                    onClick={() => { deleteTask(entry.id) }} />
                 </div>
               })}
           </>
@@ -205,14 +186,20 @@ function App() {
         <div className="mt-6 text-sm text-gray-500 dark:text-gray-400 flex justify-between">
           Completed: { data.filter(item => item.completed).length }/{ data.length }
 
-          <button id="mark-as-completed" className="hover:text-primary-light dark:hover:text-primary-dark" onClick={markVisibleAsCompleted}>
-            Mark as completed
-          </button>
-          <button id="clear-completed" className="hover:text-primary-light dark:hover:text-primary-dark" onClick={clearCompleted}>
-            Clear completed
-          </button>
+          <Button 
+            type={undefined}
+            innerText="Mark as completed"
+            className="hover:text-primary-light dark:hover:text-primary-dark"
+            onClick={markVisibleAsCompleted} />
+          <Button 
+            type={undefined}
+            innerText="Clear completed"
+            className="hover:text-primary-light dark:hover:text-primary-dark"
+            onClick={clearCompleted} />
         </div>
       }
+
+      <Icons />
     </div>
   )
 }
