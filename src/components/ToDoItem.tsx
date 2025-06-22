@@ -7,7 +7,8 @@ import type { Task } from '../types'
 import Button from './Button'
 
 export type ToDoItemProps = {
-    task: Task
+    task: Task,
+    editNameByDoubleClickEnabled?: boolean
 }
 
 const ToDoItem = (props: ToDoItemProps) => {
@@ -38,8 +39,10 @@ const ToDoItem = (props: ToDoItemProps) => {
     }
 
     function editTask() {
-        editInput.current = props.task.text
-        setEditMode(true)
+        if (props.editNameByDoubleClickEnabled) {
+            editInput.current = props.task.text
+            setEditMode(true)
+        }
     }
 
     function deleteTask() {
