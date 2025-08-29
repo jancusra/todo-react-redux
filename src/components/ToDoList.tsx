@@ -1,8 +1,10 @@
 import { useState } from 'react'
-import { useCreateTaskMutation,
-  useCompleteTaskMutation, 
-  useDeleteTaskMutation,
-  useGetAllTasksQuery } from '../rtk-query'
+import {
+    useCreateTaskMutation,
+    useCompleteTaskMutation,
+    useDeleteTaskMutation,
+    useGetAllTasksQuery
+} from '../rtk-query'
 import Button from './Button'
 import SelectBox from './SelectBox'
 import TextBox from './TextBox'
@@ -21,10 +23,10 @@ export type ToDoListProps = {
  */
 const ToDoList = (props: ToDoListProps) => {
     const { data, error, isLoading } = useGetAllTasksQuery()
-    const [ completeTaskMut ] = useCompleteTaskMutation()
-    const [ createTaskMut ] = useCreateTaskMutation()
-    const [ deleteTaskMut ] = useDeleteTaskMutation()
-    const [ onlyCompleted, setOnlyCompleted ] = useState<boolean | null>(null)
+    const [completeTaskMut] = useCompleteTaskMutation()
+    const [createTaskMut] = useCreateTaskMutation()
+    const [deleteTaskMut] = useDeleteTaskMutation()
+    const [onlyCompleted, setOnlyCompleted] = useState<boolean | null>(null)
 
     function addTask(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault()
@@ -48,7 +50,9 @@ const ToDoList = (props: ToDoListProps) => {
     }
 
     function markVisibleAsCompleted() {
-        if (data) {
+        const confirmed = confirm("Do you want to complete all visible tasks?");
+
+        if (confirmed && data) {
             data.map(entry => {
                 if ((onlyCompleted === null || onlyCompleted === false) && !entry.completed) {
                     completeTaskMut(entry.id)
@@ -58,7 +62,9 @@ const ToDoList = (props: ToDoListProps) => {
     }
 
     function clearCompleted() {
-        if (data) {
+        const confirmed = confirm("Do you want to remove all completed tasks?");
+
+        if (confirmed && data) {
             data.map(entry => {
                 if (entry.completed) {
                     deleteTaskMut(entry.id)
@@ -70,24 +76,24 @@ const ToDoList = (props: ToDoListProps) => {
     return (
         <>
             <form id="todo-form" className="mb-4 flex gap-2" onSubmit={addTask}>
-                <TextBox 
+                <TextBox
                     name="todoin"
                     className="flex-1 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-light dark:focus:ring-primary-dark"
                     placeholder="Add a new task ..."
                     required={true} />
-                <Button 
+                <Button
                     type="submit"
                     innerText="Add"
                     className="px-4 py-2 bg-primary-light dark:bg-primary-dark text-white rounded-lg hover:opacity-90 transition-opacity" />
             </form>
 
-            { props.showFilter && <SelectBox 
+            {props.showFilter && <SelectBox
                 items={[
                     { value: "all", text: "All" },
                     { value: "completed", text: "Completed" },
                     { value: "not-completed", text: "Not completed" }
                 ]}
-                onChange={changeFilter} /> 
+                onChange={changeFilter} />
             }
 
             <div id="todo-list" className="space-y-2">
@@ -103,33 +109,33 @@ const ToDoList = (props: ToDoListProps) => {
                     <>
                         {data.map(entry => {
                             if (onlyCompleted === null || (onlyCompleted && entry.completed) || (!onlyCompleted && entry.completed === false))
-                                return <ToDoItem 
-                                            key={entry.id} 
-                                            task={entry} 
-                                            editNameByDoubleClickEnabled={props.editNameByDoubleClickEnabled} />
-                                })
+                                return <ToDoItem
+                                    key={entry.id}
+                                    task={entry}
+                                    editNameByDoubleClickEnabled={props.editNameByDoubleClickEnabled} />
+                        })
                         }
                     </>
                 ) : null}
             </div>
 
-            { (props.showCompleted || props.visibleCanBeMarkedAsCompleted || props.allCompletedCanBeCleared) && data && 
+            {(props.showCompleted || props.visibleCanBeMarkedAsCompleted || props.allCompletedCanBeCleared) && data &&
                 <div className="mt-6 text-sm text-gray-500 dark:text-gray-400 flex justify-between">
-                    { props.showCompleted && 
+                    {props.showCompleted &&
                         <>
-                            Completed: { data.filter(item => item.completed).length }/{ data.length }
-                        </> 
+                            Completed: {data.filter(item => item.completed).length}/{data.length}
+                        </>
                     }
 
-                    { props.visibleCanBeMarkedAsCompleted && 
-                        <Button 
+                    {props.visibleCanBeMarkedAsCompleted &&
+                        <Button
                             type={undefined}
                             innerText="Mark as completed"
                             className="hover:text-primary-light dark:hover:text-primary-dark"
                             onClick={markVisibleAsCompleted} />
                     }
-                    { props.allCompletedCanBeCleared &&  
-                        <Button 
+                    {props.allCompletedCanBeCleared &&
+                        <Button
                             type={undefined}
                             innerText="Clear completed"
                             className="hover:text-primary-light dark:hover:text-primary-dark"

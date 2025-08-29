@@ -9,7 +9,7 @@ export type ThemeSwitchProps = {
  * light/dark theme switching component
  */
 const ThemeSwitch = (props: ThemeSwitchProps) => {
-    const [ lightTheme, setLightTheme ] = useState<boolean>(true)
+    const [lightTheme, setLightTheme] = useState<boolean>(true)
 
     useEffect(() => {
         if (props.darkAsDefault) {
@@ -25,12 +25,12 @@ const ThemeSwitch = (props: ThemeSwitchProps) => {
 
     return (
         <button id="theme-toggle" className="p-2 rounded-full bg-gray-200 dark:bg-gray-700" onClick={switchTheme}>
-            <Icon 
+            <Icon
                 name="theme-light"
-                className={lightTheme ? "hidden" : "" } />
-            <Icon 
+                className={lightTheme ? "hidden" : ""} />
+            <Icon
                 name="theme-dark"
-                className={lightTheme ? "" : "hidden" } />
+                className={lightTheme ? "" : "hidden"} />
         </button>
     )
 }

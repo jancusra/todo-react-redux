@@ -19,17 +19,19 @@ const baseQueryWithErrorHandling = async (args: string | FetchArgs, api: BaseQue
 
       // Log all errors
       console.error('API error:', result.error)
+      alert(`API error: ${JSON.stringify(result.error)}`)
     }
 
     return result
   } catch (error) {
     // Handle unexpected errors
     console.error('FETCH error:', error)
+    alert(`FETCH error: ${String(error)}`)
 
-    return { 
-      error: { 
-        status: 'FETCH_ERROR', 
-        error: String(error) 
+    return {
+      error: {
+        status: 'FETCH_ERROR',
+        error: String(error)
       }
     }
   }
@@ -119,7 +121,7 @@ export const todoListApi = createApi({
             'getAllTasks',
             undefined,
             (draft) => {
-              draft = draft.filter(function(item) {
+              draft = draft.filter(function (item) {
                 return item.id !== id
               })
               return draft

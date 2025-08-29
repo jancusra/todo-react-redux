@@ -5,7 +5,8 @@ export type ButtonProps = {
     innerText?: string,
     className?: string,
     iconName?: string,
-    onClick?: () => void
+    onClick?: () => void,
+    onMouseDown?: (e: React.MouseEvent<HTMLButtonElement>) => void
 }
 
 /**
@@ -16,9 +17,10 @@ const Button = (props: ButtonProps) => {
         <button
             type={props.type}
             className={props.className}
-            onClick={props.onClick}>
+            onClick={props.onClick}
+            onMouseDown={props.onMouseDown}>
             {props.iconName &&
-                <Icon name={props.iconName}/>
+                <Icon name={props.iconName} />
             }
             {props.innerText &&
                 <>{props.innerText}</>
