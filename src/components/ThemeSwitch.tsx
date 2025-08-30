@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Icon } from "../Icons"
 
 export type ThemeSwitchProps = {
-    darkAsDefault?: boolean
+    readonly darkAsDefault?: boolean
 }
 
 /**

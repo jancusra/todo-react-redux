@@ -1,4 +1,5 @@
-import React from "react"
+import React from 'react'
+import { cj } from './helpers'
 
 /**
  * definition of a set of SVG images used as icons
@@ -22,9 +23,9 @@ const Icons = () => {
 }
 
 export type IconProps = {
-    name: string,
-    className?: string,
-    reference?: React.Ref<SVGSVGElement>
+    readonly name: string,
+    readonly className?: string,
+    readonly reference?: React.Ref<SVGSVGElement>
 }
 
 export const Icon: React.FC<IconProps> = ({
@@ -33,7 +34,9 @@ export const Icon: React.FC<IconProps> = ({
     reference
 }) => {
     return (
-        <svg className={`w-5 h-5 ${className ? className : ''}`}
+        <svg className={cj("w-5 h-5",
+            className
+        )}
             ref={reference}
             xmlns="http://www.w3.org/2000/svg"
             xmlnsXlink="http://www.w3.org/1999/xlink">

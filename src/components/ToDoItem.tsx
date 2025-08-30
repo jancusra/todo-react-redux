@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { cj } from '../helpers'
 import {
     useCompleteTaskMutation,
     useDeleteTaskMutation,
@@ -9,8 +10,8 @@ import type { Task } from '../types'
 import Button from './Button'
 
 export type ToDoItemProps = {
-    task: Task,
-    editNameByDoubleClickEnabled?: boolean
+    readonly task: Task,
+    readonly editNameByDoubleClickEnabled?: boolean
 }
 
 /**
@@ -69,7 +70,8 @@ const ToDoItem: React.FC<ToDoItemProps> = ({
     return (
         <div className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg shadow">
             <input
-                className="h-5 w-5 rounded border-gray-300 text-primary-light dark:text-primary-dark focus:ring-primary-light dark:focus:ring-primary-dark accent-primary-light dark:accent-primary-dark"
+                className={cj("h-5 w-5 rounded border-gray-300 text-primary-light accent-primary-light focus:ring-primary-light",
+                    "dark:text-primary-dark dark:focus:ring-primary-dark dark:accent-primary-dark")}
                 type="checkbox"
                 checked={task.completed}
                 onChange={changeTaskState} />
@@ -91,16 +93,20 @@ const ToDoItem: React.FC<ToDoItemProps> = ({
                     />
                 </>
             ) : (
-                <span className={`flex-1 cursor-text ${task.completed ? 'line-through opacity-70' : ''}`} onDoubleClick={editTask}>
+                <span className={cj("flex-1 cursor-text",
+                    task.completed && "line-through opacity-70"
+                )}
+                    onDoubleClick={editTask}>
                     {task.text}
                 </span>
-            )}
+            )
+            }
             <Button
                 type={undefined}
                 className="text-red-500 hover:text-red-700 dark:hover:text-red-400"
                 iconName="remove-bin"
                 onClick={deleteTask} />
-        </div>
+        </div >
     )
 }
 

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { cj } from '../helpers'
 import {
     useCreateTaskMutation,
     useCompleteTaskMutation,
@@ -12,11 +13,11 @@ import TextBox from './TextBox'
 import ToDoItem from './ToDoItem'
 
 export type ToDoListProps = {
-    editNameByDoubleClickEnabled?: boolean,
-    showFilter?: boolean,
-    showCompleted?: boolean,
-    visibleCanBeMarkedAsCompleted?: boolean,
-    allCompletedCanBeCleared?: boolean
+    readonly editNameByDoubleClickEnabled?: boolean,
+    readonly showFilter?: boolean,
+    readonly showCompleted?: boolean,
+    readonly visibleCanBeMarkedAsCompleted?: boolean,
+    readonly allCompletedCanBeCleared?: boolean
 }
 
 /**
@@ -54,7 +55,7 @@ const ToDoList: React.FC<ToDoListProps> = ({
         const confirmed = confirm("Do you want to complete all visible tasks?");
 
         if (confirmed && data) {
-            data.map(entry => {
+            data.forEach(entry => {
                 if (filterType !== "Completed" && !entry.completed) {
                     completeTaskMut(entry.id)
                 }
@@ -66,7 +67,7 @@ const ToDoList: React.FC<ToDoListProps> = ({
         const confirmed = confirm("Do you want to remove all completed tasks?");
 
         if (confirmed && data) {
-            data.map(entry => {
+            data.forEach(entry => {
                 if (entry.completed) {
                     deleteTaskMut(entry.id)
                 }
@@ -79,7 +80,9 @@ const ToDoList: React.FC<ToDoListProps> = ({
             <form id="todo-form" className="mb-4 flex gap-2" onSubmit={addTask}>
                 <TextBox
                     name="todoin"
-                    className="flex-1 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-light dark:focus:ring-primary-dark"
+                    className={cj("flex-1 px-4 py-2 rounded-lg border border-gray-300 bg-white",
+                        "focus:outline-none focus:ring-2 focus:ring-primary-light",
+                        "dark:border-gray-600 dark:bg-gray-800 dark:focus:ring-primary-dark")}
                     placeholder="Add a new task ..."
                     required={true} />
                 <Button

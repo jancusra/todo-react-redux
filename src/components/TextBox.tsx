@@ -1,9 +1,9 @@
 
 export type TextBoxProps = {
-    name: string,
-    className?: string,
-    placeholder?: string,
-    required?: boolean
+    readonly name: string,
+    readonly className?: string,
+    readonly placeholder?: string,
+    readonly required?: boolean
 }
 
 /**

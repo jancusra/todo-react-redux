@@ -1,11 +1,11 @@
 // Common types & unions
 
 export type Task = {
-  id: string;
-  text: string;
+  readonly id: string;
+  readonly text: string;
+  readonly createdDate: number;
+  readonly completedDate: number;
   completed: boolean;
-  createdDate: number;
-  completedDate: number;
 }
 
 export type CreateTask = {

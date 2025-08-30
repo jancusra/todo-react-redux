@@ -1,12 +1,12 @@
 import { Icon } from "../Icons"
 
 export type ButtonProps = {
-    type: "submit" | "reset" | "button" | undefined,
-    innerText?: string,
-    className?: string,
-    iconName?: string,
-    onClick?: () => void,
-    onMouseDown?: (e: React.MouseEvent<HTMLButtonElement>) => void
+    readonly type: "submit" | "reset" | "button" | undefined,
+    readonly innerText?: string,
+    readonly className?: string,
+    readonly iconName?: string,
+    readonly onClick?: () => void,
+    readonly onMouseDown?: (e: React.MouseEvent<HTMLButtonElement>) => void
 }
 
 /**
