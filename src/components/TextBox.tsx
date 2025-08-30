@@ -9,14 +9,19 @@ export type TextBoxProps = {
 /**
  * component for input text
  */
-const TextBox = (props: TextBoxProps) => {
+const TextBox: React.FC<TextBoxProps> = ({
+    name,
+    className,
+    placeholder,
+    required
+}) => {
     return (
         <input
             type="text"
-            name={props.name}
-            className={props.className}
-            placeholder={props.placeholder}
-            required={props.required} />
+            name={name}
+            className={className}
+            placeholder={placeholder}
+            required={required} />
     )
 }
 

@@ -5,6 +5,7 @@ import {
     useDeleteTaskMutation,
     useGetAllTasksQuery
 } from '../rtk-query'
+import type { FilterType } from '../types'
 import Button from './Button'
 import SelectBox from './SelectBox'
 import TextBox from './TextBox'
@@ -21,32 +22,32 @@ export type ToDoListProps = {
 /**
  * component for a complete list of tasks and their management
  */
-const ToDoList = (props: ToDoListProps) => {
+const ToDoList: React.FC<ToDoListProps> = ({
+    editNameByDoubleClickEnabled,
+    showFilter,
+    showCompleted,
+    visibleCanBeMarkedAsCompleted,
+    allCompletedCanBeCleared
+}) => {
     const { data, error, isLoading } = useGetAllTasksQuery()
     const [completeTaskMut] = useCompleteTaskMutation()
     const [createTaskMut] = useCreateTaskMutation()
     const [deleteTaskMut] = useDeleteTaskMutation()
-    const [onlyCompleted, setOnlyCompleted] = useState<boolean | null>(null)
+    const [filterType, setFilterType] = useState<FilterType>("All");
 
     function addTask(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault()
 
         const formData = new FormData(e.target as HTMLFormElement)
-        const input_text = formData.get('todoin') as string
+        const inputRaw = formData.get('todoin')
 
-        if (input_text) {
-            createTaskMut({ text: input_text })
+        if (typeof inputRaw === "string") {
+            createTaskMut({ text: inputRaw })
         }
     }
 
-    function changeFilter(filterState: string) {
-        if (filterState === "completed") {
-            setOnlyCompleted(true)
-        } else if (filterState === "not-completed") {
-            setOnlyCompleted(false)
-        } else {
-            setOnlyCompleted(null)
-        }
+    function changeFilter(filterType: string) {
+        setFilterType(filterType as FilterType)
     }
 
     function markVisibleAsCompleted() {
@@ -54,7 +55,7 @@ const ToDoList = (props: ToDoListProps) => {
 
         if (confirmed && data) {
             data.map(entry => {
-                if ((onlyCompleted === null || onlyCompleted === false) && !entry.completed) {
+                if (filterType !== "Completed" && !entry.completed) {
                     completeTaskMut(entry.id)
                 }
             })
@@ -87,11 +88,11 @@ const ToDoList = (props: ToDoListProps) => {
                     className="px-4 py-2 bg-primary-light dark:bg-primary-dark text-white rounded-lg hover:opacity-90 transition-opacity" />
             </form>
 
-            {props.showFilter && <SelectBox
+            {showFilter && <SelectBox
                 items={[
-                    { value: "all", text: "All" },
-                    { value: "completed", text: "Completed" },
-                    { value: "not-completed", text: "Not completed" }
+                    { value: "All", text: "All" },
+                    { value: "Completed", text: "Completed" },
+                    { value: "NotCompleted", text: "Not completed" }
                 ]}
                 onChange={changeFilter} />
             }
@@ -108,33 +109,32 @@ const ToDoList = (props: ToDoListProps) => {
                 ) : data ? (
                     <>
                         {data.map(entry => {
-                            if (onlyCompleted === null || (onlyCompleted && entry.completed) || (!onlyCompleted && entry.completed === false))
+                            if (filterType === "All" || (filterType === "Completed" && entry.completed) || (filterType === "NotCompleted" && !entry.completed))
                                 return <ToDoItem
                                     key={entry.id}
                                     task={entry}
-                                    editNameByDoubleClickEnabled={props.editNameByDoubleClickEnabled} />
-                        })
-                        }
+                                    editNameByDoubleClickEnabled={editNameByDoubleClickEnabled} />
+                        })}
                     </>
                 ) : null}
             </div>
 
-            {(props.showCompleted || props.visibleCanBeMarkedAsCompleted || props.allCompletedCanBeCleared) && data &&
+            {(showCompleted || visibleCanBeMarkedAsCompleted || allCompletedCanBeCleared) && data &&
                 <div className="mt-6 text-sm text-gray-500 dark:text-gray-400 flex justify-between">
-                    {props.showCompleted &&
+                    {showCompleted &&
                         <>
                             Completed: {data.filter(item => item.completed).length}/{data.length}
                         </>
                     }
 
-                    {props.visibleCanBeMarkedAsCompleted &&
+                    {visibleCanBeMarkedAsCompleted &&
                         <Button
                             type={undefined}
                             innerText="Mark as completed"
                             className="hover:text-primary-light dark:hover:text-primary-dark"
                             onClick={markVisibleAsCompleted} />
                     }
-                    {props.allCompletedCanBeCleared &&
+                    {allCompletedCanBeCleared &&
                         <Button
                             type={undefined}
                             innerText="Clear completed"

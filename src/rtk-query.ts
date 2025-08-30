@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import type { BaseQueryApi, BaseQueryExtraOptions, BaseQueryFn, FetchArgs, RetryOptions } from '@reduxjs/toolkit/query/react'
-import type { Task } from './types'
+import type { CreateTask, Task } from './types'
 
 /**
  * mechanism for catching errors in the API and displaying them in the console
@@ -54,26 +54,40 @@ export const todoListApi = createApi({
           : ['Tasks']
     }),
     // create a task
-    createTask: build.mutation<Task, Partial<Task>>({
-      query: (create_task) => ({
+    createTask: build.mutation<Task, CreateTask>({
+      query: (createTaskQuery) => ({
         url: 'tasks',
         method: 'POST',
-        body: create_task
+        body: createTaskQuery
       }),
-      // optimistic cache update (or cache purge) at the start of the query
-      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        // optimistically add a new task with a temporary ID
+        const tempId = `temp-${Date.now()}`
+
+        dispatch(
+          todoListApi.util.updateQueryData('getAllTasks', undefined, (draft) => {
+            draft.push({
+              // fields you already know from the form:
+              ...arg,
+              // temporary values:
+              id: tempId,
+              completed: false
+            } as Task)
+          })
+        )
+
         try {
-          const response = await queryFulfilled
+          const { data } = await queryFulfilled;
 
           dispatch(
-            todoListApi.util.updateQueryData(
-              'getAllTasks',
-              undefined,
-              (draft) => {
-                draft.push(response.data)
-                return draft
+            todoListApi.util.updateQueryData('getAllTasks', undefined, (draft) => {
+              const i = draft.findIndex((t) => t.id === tempId)
+              if (i !== -1) {
+                draft[i] = data // replace temporary with real data
+              } else {
+                draft.push(data) // fallback in case the temporary item disappeared
               }
-            )
+            })
           )
         } catch {
           dispatch(todoListApi.util.invalidateTags(['Tasks']))
@@ -82,10 +96,10 @@ export const todoListApi = createApi({
     }),
     // update a task
     updateTask: build.mutation<Task, Partial<Task>>({
-      query: (update_task) => ({
-        url: `tasks/${update_task.id}`,
+      query: (updateTaskQuery) => ({
+        url: `tasks/${updateTaskQuery.id}`,
         method: 'POST',
-        body: { "text": update_task.text }
+        body: { "text": updateTaskQuery.text }
       }),
       async onQueryStarted({ id, ...patch }, { dispatch, queryFulfilled }) {
         dispatch(

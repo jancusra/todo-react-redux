@@ -8,11 +8,13 @@ export type ThemeSwitchProps = {
 /**
  * light/dark theme switching component
  */
-const ThemeSwitch = (props: ThemeSwitchProps) => {
+const ThemeSwitch: React.FC<ThemeSwitchProps> = ({
+    darkAsDefault
+}) => {
     const [lightTheme, setLightTheme] = useState<boolean>(true)
 
     useEffect(() => {
-        if (props.darkAsDefault) {
+        if (darkAsDefault) {
             document.documentElement.classList.toggle('dark')
             setLightTheme(false)
         }
@@ -25,12 +27,7 @@ const ThemeSwitch = (props: ThemeSwitchProps) => {
 
     return (
         <button id="theme-toggle" className="p-2 rounded-full bg-gray-200 dark:bg-gray-700" onClick={switchTheme}>
-            <Icon
-                name="theme-light"
-                className={lightTheme ? "hidden" : ""} />
-            <Icon
-                name="theme-dark"
-                className={lightTheme ? "" : "hidden"} />
+            <Icon name={lightTheme ? "theme-dark" : "theme-light"} />
         </button>
     )
 }

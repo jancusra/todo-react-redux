@@ -16,7 +16,10 @@ export type ToDoItemProps = {
 /**
  * component for one item of a scheduled task and its modification
  */
-const ToDoItem = (props: ToDoItemProps) => {
+const ToDoItem: React.FC<ToDoItemProps> = ({
+    task,
+    editNameByDoubleClickEnabled
+}) => {
     const [completeTaskMut] = useCompleteTaskMutation()
     const [deleteTaskMut] = useDeleteTaskMutation()
     const [incompleteTaskMut] = useIncompleteTaskMutation()
@@ -25,10 +28,10 @@ const ToDoItem = (props: ToDoItemProps) => {
     const editInput = useRef<string | null>(null)
 
     function changeTaskState() {
-        if (props.task.completed) {
-            incompleteTaskMut(props.task.id)
+        if (task.completed) {
+            incompleteTaskMut(task.id)
         } else {
-            completeTaskMut(props.task.id)
+            completeTaskMut(task.id)
         }
     }
 
@@ -36,15 +39,9 @@ const ToDoItem = (props: ToDoItemProps) => {
         editInput.current = e.target.value
     }
 
-    function onEditBlur(e: React.FocusEvent<HTMLInputElement>) {
-        const next = e.relatedTarget as HTMLElement | null;
-        if (next?.dataset.preventBlur === "true") {
-            console.log("YES!")
-            return;
-        }
-
+    function onEditBlur() {
         if (editMode && editInput.current) {
-            updateTaskMut({ id: props.task.id, text: editInput.current })
+            updateTaskMut({ id: task.id, text: editInput.current })
             setEditMode(false)
         }
     }
@@ -59,14 +56,14 @@ const ToDoItem = (props: ToDoItemProps) => {
     }
 
     function editTask() {
-        if (props.editNameByDoubleClickEnabled) {
-            editInput.current = props.task.text
+        if (editNameByDoubleClickEnabled) {
+            editInput.current = task.text
             setEditMode(true)
         }
     }
 
     function deleteTask() {
-        deleteTaskMut(props.task.id)
+        deleteTaskMut(task.id)
     }
 
     return (
@@ -74,14 +71,14 @@ const ToDoItem = (props: ToDoItemProps) => {
             <input
                 className="h-5 w-5 rounded border-gray-300 text-primary-light dark:text-primary-dark focus:ring-primary-light dark:focus:ring-primary-dark accent-primary-light dark:accent-primary-dark"
                 type="checkbox"
-                checked={props.task.completed}
+                checked={task.completed}
                 onChange={changeTaskState} />
             {editMode ? (
                 <>
                     <input
                         className='flex-1'
                         type="text"
-                        defaultValue={props.task.text}
+                        defaultValue={task.text}
                         autoFocus={true}
                         onChange={onEditChange}
                         onBlur={onEditBlur}
@@ -94,8 +91,8 @@ const ToDoItem = (props: ToDoItemProps) => {
                     />
                 </>
             ) : (
-                <span className={`flex-1 cursor-text ${props.task.completed ? 'line-through opacity-70' : ''}`} onDoubleClick={editTask}>
-                    {props.task.text}
+                <span className={`flex-1 cursor-text ${task.completed ? 'line-through opacity-70' : ''}`} onDoubleClick={editTask}>
+                    {task.text}
                 </span>
             )}
             <Button

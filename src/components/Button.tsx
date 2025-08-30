@@ -12,19 +12,24 @@ export type ButtonProps = {
 /**
  * general button component
  */
-const Button = (props: ButtonProps) => {
+const Button: React.FC<ButtonProps> = ({
+    type,
+    innerText,
+    className,
+    iconName,
+    onClick,
+    onMouseDown
+}) => {
     return (
         <button
-            type={props.type}
-            className={props.className}
-            onClick={props.onClick}
-            onMouseDown={props.onMouseDown}>
-            {props.iconName &&
-                <Icon name={props.iconName} />
+            type={type}
+            className={className}
+            onClick={onClick}
+            onMouseDown={onMouseDown}>
+            {iconName &&
+                <Icon name={iconName} />
             }
-            {props.innerText &&
-                <>{props.innerText}</>
-            }
+            {innerText}
         </button>
     )
 }
