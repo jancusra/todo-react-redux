@@ -2,6 +2,7 @@ import { createRoot } from 'react-dom/client'
 import { Provider } from 'react-redux'
 
 import App from './App'
+import ErrorBoundary from './components/ErrorBoundary'
 import { store } from './store'
 
 // should prevent double rendering in development mode
@@ -11,9 +12,11 @@ if (container) {
   const root = createRoot(container)
 
   root.render(
-    <Provider store={store}>
-      <App />
-    </Provider>
+    <ErrorBoundary>
+      <Provider store={store}>
+        <App />
+      </Provider>
+    </ErrorBoundary>
   )
 } else {
   throw new Error(

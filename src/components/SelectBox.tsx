@@ -1,26 +1,27 @@
 import { cj } from '../helpers'
 
-export type SelectItem = {
-    readonly value: string,
+export type SelectItem<T extends string = string> = {
+    readonly value: T,
     readonly text: string
 }
 
-export type SelectBoxProps = {
-    readonly items: readonly SelectItem[],
-    readonly value: string,
-    readonly onChange?: (value: string) => void
+export type SelectBoxProps<T extends string = string> = {
+    readonly items: readonly SelectItem<T>[],
+    readonly value: T,
+    readonly onChange?: (value: T) => void
 }
 
 /**
  * responsive, controlled selection component
- * (Tabs on desktop & DropDown on mobile devices)
+ * (Tabs on desktop & DropDown on mobile devices);
+ * generic over the value type so callers get compile-time checked options
  */
-const SelectBox: React.FC<SelectBoxProps> = ({
+function SelectBox<T extends string = string>({
     items,
     value,
     onChange
-}) => {
-    const onSelectChange = (newValue: string) => {
+}: SelectBoxProps<T>) {
+    const onSelectChange = (newValue: T) => {
         if (onChange) {
             onChange(newValue)
         }
@@ -35,7 +36,7 @@ const SelectBox: React.FC<SelectBoxProps> = ({
                     className={cj("bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg",
                         "focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5",
                         "dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500")}
-                    onChange={(e) => { onSelectChange(e.target.value) }}>
+                    onChange={(e) => { onSelectChange(e.target.value as T) }}>
                     {items.map(item =>
                         <option key={item.value} value={item.value}>{item.text}</option>
                     )}

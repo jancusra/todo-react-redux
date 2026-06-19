@@ -40,19 +40,35 @@ const ToDoItem: React.FC<ToDoItemProps> = ({
         editInput.current = e.target.value
     }
 
-    function onEditBlur() {
-        if (editMode && editInput.current) {
-            updateTaskMut({ id: task.id, text: editInput.current })
-            setEditMode(false)
+    // save only when the text actually changed and is not empty
+    function commitEdit() {
+        const next = editInput.current?.trim()
+
+        if (next && next !== task.text) {
+            updateTaskMut({ id: task.id, text: next })
         }
+
+        editInput.current = null
+        setEditMode(false)
+    }
+
+    function cancelEdit() {
+        editInput.current = null
+        setEditMode(false)
     }
 
     function onEditCancel(e: React.MouseEvent<HTMLButtonElement>) {
         e.preventDefault()
+        cancelEdit()
+    }
 
-        if (editMode) {
-            editInput.current = null
-            setEditMode(false)
+    function onEditKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+        if (e.key === "Enter") {
+            e.preventDefault()
+            commitEdit()
+        } else if (e.key === "Escape") {
+            e.preventDefault()
+            cancelEdit()
         }
     }
 
@@ -86,7 +102,8 @@ const ToDoItem: React.FC<ToDoItemProps> = ({
                         defaultValue={task.text}
                         autoFocus={true}
                         onChange={onEditChange}
-                        onBlur={onEditBlur}
+                        onBlur={commitEdit}
+                        onKeyDown={onEditKeyDown}
                     />
                     <Button
                         type="button"

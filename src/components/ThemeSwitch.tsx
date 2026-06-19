@@ -23,7 +23,10 @@ const ThemeSwitch: React.FC<ThemeSwitchProps> = ({
     }
 
     return (
-        <button id="theme-toggle" className="p-2 rounded-full bg-gray-200 dark:bg-gray-700" onClick={switchTheme}>
+        <button id="theme-toggle"
+            aria-label={lightTheme ? "Switch to dark theme" : "Switch to light theme"}
+            className="p-2 rounded-full bg-gray-200 dark:bg-gray-700"
+            onClick={switchTheme}>
             <Icon name={lightTheme ? "theme-dark" : "theme-light"} />
         </button>
     )

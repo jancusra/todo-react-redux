@@ -92,8 +92,8 @@ export const todoListApi = createApi({
     updateTask: build.mutation<Task, Partial<Task>>({
       query: (updateTaskQuery) => ({
         url: `tasks/${updateTaskQuery.id}`,
-        method: 'POST',
-        body: { "text": updateTaskQuery.text }
+        method: 'PUT',
+        body: { text: updateTaskQuery.text }
       }),
       async onQueryStarted({ id, ...patch }, { dispatch, queryFulfilled }) {
         dispatch(

@@ -49,9 +49,6 @@ const ToDoList: React.FC<ToDoListProps> = ({
         }
     }
 
-    function changeFilter(filterType: string) {
-        setFilterType(filterType as FilterType)
-    }
 
     function markVisibleAsCompleted() {
         const confirmed = confirm("Do you want to complete all visible tasks?");
@@ -95,14 +92,14 @@ const ToDoList: React.FC<ToDoListProps> = ({
                         isCreating ? "opacity-60 cursor-not-allowed" : "hover:opacity-90")} />
             </form>
 
-            {showFilter && <SelectBox
+            {showFilter && <SelectBox<FilterType>
                 items={[
                     { value: "All", text: "All" },
                     { value: "Completed", text: "Completed" },
                     { value: "NotCompleted", text: "Not completed" }
                 ]}
                 value={filterType}
-                onChange={changeFilter} />
+                onChange={setFilterType} />
             }
 
             <div id="todo-list" className="space-y-2">
