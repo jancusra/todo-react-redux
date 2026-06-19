@@ -1,27 +1,12 @@
-
-export type TextBoxProps = {
-    readonly name: string,
-    readonly className?: string,
-    readonly placeholder?: string,
-    readonly required?: boolean
-}
+export type TextBoxProps = React.ComponentPropsWithoutRef<'input'>
 
 /**
- * component for input text
+ * component for input text; forwards all native input attributes
+ * (name, placeholder, required, maxLength, aria-*, ...) and defaults to type="text"
  */
-const TextBox: React.FC<TextBoxProps> = ({
-    name,
-    className,
-    placeholder,
-    required
-}) => {
+const TextBox: React.FC<TextBoxProps> = ({ type = "text", ...rest }) => {
     return (
-        <input
-            type="text"
-            name={name}
-            className={className}
-            placeholder={placeholder}
-            required={required} />
+        <input type={type} {...rest} />
     )
 }
 

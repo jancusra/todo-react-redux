@@ -1,5 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import type { BaseQueryApi, BaseQueryExtraOptions, BaseQueryFn, FetchArgs, RetryOptions } from '@reduxjs/toolkit/query/react'
+import type { ThunkDispatch, UnknownAction } from '@reduxjs/toolkit'
 import type { CreateTask, Task } from './types'
 
 // API base URL is configurable via the VITE_API_URL env var (see .env)
@@ -31,6 +32,33 @@ const baseQueryWithErrorHandling = async (args: string | FetchArgs, api: BaseQue
   }
 }
 
+// minimal shape of the lifecycle api we use inside onQueryStarted; kept loose
+// so the shared helper stays decoupled from RTK Query's internal generics
+type OptimisticLifecycle = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  dispatch: ThunkDispatch<any, any, UnknownAction>
+  queryFulfilled: Promise<unknown>
+}
+
+/**
+ * shared optimistic-update helper for the toggle/update/delete mutations:
+ * applies `recipe` to the cached task list immediately and, on failure, rolls
+ * the change back locally with `patchResult.undo()` (no refetch / no flash)
+ */
+function optimisticUpdate(recipe: (draft: Task[]) => void) {
+  return async ({ dispatch, queryFulfilled }: OptimisticLifecycle) => {
+    const patchResult = dispatch(
+      todoListApi.util.updateQueryData('getAllTasks', undefined, recipe)
+    )
+
+    try {
+      await queryFulfilled
+    } catch {
+      patchResult.undo()
+    }
+  }
+}
+
 /**
  * complete API definition for server communication, caching and optimistic updates
  */
@@ -58,15 +86,18 @@ export const todoListApi = createApi({
         // optimistically add a new task with a temporary ID
         const tempId = `temp-${Date.now()}`
 
-        dispatch(
+        const patchResult = dispatch(
           todoListApi.util.updateQueryData('getAllTasks', undefined, (draft) => {
-            draft.push({
+            const optimisticTask: Task = {
               // fields you already know from the form:
               ...arg,
-              // temporary values:
+              // temporary values, replaced by the server response on success:
               id: tempId,
-              completed: false
-            } as Task)
+              completed: false,
+              createdDate: Date.now(),
+              completedDate: 0
+            }
+            draft.push(optimisticTask)
           })
         )
 
@@ -84,7 +115,8 @@ export const todoListApi = createApi({
             })
           )
         } catch {
-          dispatch(todoListApi.util.invalidateTags(['Tasks']))
+          // remove the temporary item; no refetch needed
+          patchResult.undo()
         }
       }
     }),
@@ -95,26 +127,13 @@ export const todoListApi = createApi({
         method: 'PUT',
         body: { text: updateTaskQuery.text }
       }),
-      async onQueryStarted({ id, ...patch }, { dispatch, queryFulfilled }) {
-        dispatch(
-          todoListApi.util.updateQueryData(
-            'getAllTasks',
-            undefined,
-            (draft) => {
-              const item = draft.find((task) => task.id === id)
-              if (item) {
-                Object.assign(item, patch)
-              }
-              return draft
-            }
-          )
-        )
-
-        try {
-          await queryFulfilled
-        } catch {
-          dispatch(todoListApi.util.invalidateTags([{ type: 'Tasks', id }]))
-        }
+      onQueryStarted({ id, ...patch }, api) {
+        return optimisticUpdate((draft) => {
+          const item = draft.find((task) => task.id === id)
+          if (item) {
+            Object.assign(item, patch)
+          }
+        })(api)
       }
     }),
     // delete a task & optimistic cache update
@@ -123,25 +142,13 @@ export const todoListApi = createApi({
         url: `tasks/${id}`,
         method: 'DELETE'
       }),
-      async onQueryStarted(id, { dispatch, queryFulfilled }) {
-        dispatch(
-          todoListApi.util.updateQueryData(
-            'getAllTasks',
-            undefined,
-            (draft) => {
-              const i = draft.findIndex((task) => task.id === id)
-              if (i !== -1) {
-                draft.splice(i, 1)
-              }
-            }
-          )
-        )
-
-        try {
-          await queryFulfilled
-        } catch {
-          dispatch(todoListApi.util.invalidateTags(['Tasks']))
-        }
+      onQueryStarted(id, api) {
+        return optimisticUpdate((draft) => {
+          const i = draft.findIndex((task) => task.id === id)
+          if (i !== -1) {
+            draft.splice(i, 1)
+          }
+        })(api)
       }
     }),
     // mark task as completed & optimistic cache update
@@ -150,26 +157,13 @@ export const todoListApi = createApi({
         url: `tasks/${id}/complete`,
         method: 'POST'
       }),
-      async onQueryStarted(id, { dispatch, queryFulfilled }) {
-        dispatch(
-          todoListApi.util.updateQueryData(
-            'getAllTasks',
-            undefined,
-            (draft) => {
-              const item = draft.find((task) => task.id === id)
-              if (item) {
-                item.completed = true
-              }
-              return draft
-            }
-          )
-        )
-
-        try {
-          await queryFulfilled
-        } catch {
-          dispatch(todoListApi.util.invalidateTags([{ type: 'Tasks', id }]))
-        }
+      onQueryStarted(id, api) {
+        return optimisticUpdate((draft) => {
+          const item = draft.find((task) => task.id === id)
+          if (item) {
+            item.completed = true
+          }
+        })(api)
       }
     }),
     // mark task as incompleted & optimistic cache update
@@ -178,26 +172,13 @@ export const todoListApi = createApi({
         url: `tasks/${id}/incomplete`,
         method: 'POST'
       }),
-      async onQueryStarted(id, { dispatch, queryFulfilled }) {
-        dispatch(
-          todoListApi.util.updateQueryData(
-            'getAllTasks',
-            undefined,
-            (draft) => {
-              const item = draft.find((task) => task.id === id)
-              if (item) {
-                item.completed = false
-              }
-              return draft
-            }
-          )
-        )
-
-        try {
-          await queryFulfilled
-        } catch {
-          dispatch(todoListApi.util.invalidateTags([{ type: 'Tasks', id }]))
-        }
+      onQueryStarted(id, api) {
+        return optimisticUpdate((draft) => {
+          const item = draft.find((task) => task.id === id)
+          if (item) {
+            item.completed = false
+          }
+        })(api)
       }
     })
   })

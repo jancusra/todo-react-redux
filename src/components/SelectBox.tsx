@@ -1,3 +1,4 @@
+import { useId } from 'react'
 import { cj } from '../helpers'
 
 export type SelectItem<T extends string = string> = {
@@ -21,6 +22,9 @@ function SelectBox<T extends string = string>({
     value,
     onChange
 }: SelectBoxProps<T>) {
+    // unique per instance so multiple SelectBoxes don't share the same DOM id
+    const selectId = useId()
+
     const onSelectChange = (newValue: T) => {
         if (onChange) {
             onChange(newValue)
@@ -30,8 +34,8 @@ function SelectBox<T extends string = string>({
     return (
         <>
             <div className="sm:hidden pb-4">
-                <label htmlFor="tabs" className="sr-only">Select option</label>
-                <select id="tabs"
+                <label htmlFor={selectId} className="sr-only">Select option</label>
+                <select id={selectId}
                     value={value}
                     className={cj("bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg",
                         "focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5",

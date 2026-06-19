@@ -6,9 +6,21 @@
   <link rel="icon" type="image/svg+xml" href="/vite.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ToDo App</title>
-  <!-- apply the dark theme before first paint to avoid a flash of the light theme -->
+  <!--
+    Single source of truth for the initial theme: read the persisted choice
+    from localStorage (default: dark) and apply it before first paint to avoid
+    a flash of the wrong theme. ThemeSwitch reads this class back at runtime.
+  -->
   <script>
-    document.documentElement.classList.add('dark')
+    (function () {
+      try {
+        var stored = localStorage.getItem('theme')
+        var dark = stored === null ? true : stored === 'dark'
+        document.documentElement.classList.toggle('dark', dark)
+      } catch (e) {
+        document.documentElement.classList.add('dark')
+      }
+    })()
   </script>
 </head>
 
