@@ -83,8 +83,8 @@ export const todoListApi = createApi({
         body: createTaskQuery
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
-        // optimistically add a new task with a temporary ID
-        const tempId = `temp-${Date.now()}`
+        // optimistically add a new task with a collision-free temporary ID
+        const tempId = `temp-${crypto.randomUUID()}`
 
         const patchResult = dispatch(
           todoListApi.util.updateQueryData('getAllTasks', undefined, (draft) => {
@@ -94,8 +94,8 @@ export const todoListApi = createApi({
               // temporary values, replaced by the server response on success:
               id: tempId,
               completed: false,
-              createdDate: Date.now(),
-              completedDate: 0
+              createdDate: Date.now()
+              // completedDate is left unset, matching the backend on creation
             }
             draft.push(optimisticTask)
           })
@@ -123,8 +123,9 @@ export const todoListApi = createApi({
     // update a task
     updateTask: build.mutation<Task, Partial<Task>>({
       query: (updateTaskQuery) => ({
+        // backend exposes text updates as POST /tasks/:id (no PUT handler)
         url: `tasks/${updateTaskQuery.id}`,
-        method: 'PUT',
+        method: 'POST',
         body: { text: updateTaskQuery.text }
       }),
       onQueryStarted({ id, ...patch }, api) {

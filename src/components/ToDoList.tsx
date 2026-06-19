@@ -36,6 +36,8 @@ const ToDoList: React.FC<ToDoListProps> = ({
     const [deleteTaskMut] = useDeleteTaskMutation()
     const [filterType, setFilterType] = useState<FilterType>("All");
 
+    const visibleTasks = data ? filterTasks(data, filterType) : []
+
     function addTask(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault()
 
@@ -53,8 +55,8 @@ const ToDoList: React.FC<ToDoListProps> = ({
     function markVisibleAsCompleted() {
         const confirmed = confirm("Do you want to complete all visible tasks?");
 
-        if (confirmed && data) {
-            filterTasks(data, filterType).forEach(entry => {
+        if (confirmed) {
+            visibleTasks.forEach(entry => {
                 if (!entry.completed) {
                     completeTaskMut(entry.id)
                 }
@@ -115,8 +117,12 @@ const ToDoList: React.FC<ToDoListProps> = ({
                     <div className="text-center py-4 text-gray-500 dark:text-gray-400">
                         No tasks yet. Add one above!
                     </div>
+                ) : visibleTasks.length === 0 ? (
+                    <div className="text-center py-4 text-gray-500 dark:text-gray-400">
+                        No tasks match this filter.
+                    </div>
                 ) : (
-                    filterTasks(data, filterType).map(entry =>
+                    visibleTasks.map(entry =>
                         <ToDoItem
                             key={entry.id}
                             task={entry}
