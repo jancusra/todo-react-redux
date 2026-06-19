@@ -194,7 +194,7 @@ export const todoListApi = createApi({
         })(api)
       }
     }),
-    // mark task as incompleted & optimistic cache update
+    // mark task as not completed & optimistic cache update
     incompleteTask: build.mutation<Task, string>({
       query: (id) => ({
         url: `tasks/${id}/incomplete`,

@@ -5,7 +5,7 @@ import App from './App'
 import ErrorBoundary from './components/ErrorBoundary'
 import { store } from './store'
 
-// should prevent double rendering in development mode
+// look up the root element up front so we can fail with a clear error if it is missing
 const container = document.getElementById('root')
 
 if (container) {

@@ -24,20 +24,17 @@ const Icons = () => {
 
 export type IconProps = {
     readonly name: string,
-    readonly className?: string,
-    readonly reference?: React.Ref<SVGSVGElement>
+    readonly className?: string
 }
 
 export const Icon: React.FC<IconProps> = ({
     name,
-    className,
-    reference
+    className
 }) => {
     return (
         <svg className={cj("w-5 h-5",
             className
         )}
-            ref={reference}
             // icons are decorative; the interactive element carries the label
             aria-hidden="true"
             focusable="false"

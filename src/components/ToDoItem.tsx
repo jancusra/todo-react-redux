@@ -15,7 +15,7 @@ export type ToDoItemProps = {
 }
 
 /**
- * component for one item of a scheduled task and its modification
+ * component for a single to-do item and its editing
  */
 const ToDoItem: React.FC<ToDoItemProps> = ({
     task,

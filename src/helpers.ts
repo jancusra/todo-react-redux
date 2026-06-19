@@ -2,7 +2,8 @@
 
 import type { FilterType, Task } from './types'
 
-// method combines classes (some string of base classes and various conditions separated by commas)
+// joins the given class names into a single string, dropping falsy values
+// (so conditional classes can be passed inline)
 export function cj(...classes: (string | false | null | undefined)[]) {
     return classes.filter(Boolean).join(" ");
 }
