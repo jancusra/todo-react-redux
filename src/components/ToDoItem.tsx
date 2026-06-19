@@ -21,9 +21,9 @@ const ToDoItem: React.FC<ToDoItemProps> = ({
     task,
     editNameByDoubleClickEnabled
 }) => {
-    const [completeTaskMut] = useCompleteTaskMutation()
-    const [deleteTaskMut] = useDeleteTaskMutation()
-    const [incompleteTaskMut] = useIncompleteTaskMutation()
+    const [completeTaskMut, { isLoading: isCompleting }] = useCompleteTaskMutation()
+    const [deleteTaskMut, { isLoading: isDeleting }] = useDeleteTaskMutation()
+    const [incompleteTaskMut, { isLoading: isIncompleting }] = useIncompleteTaskMutation()
     const [updateTaskMut] = useUpdateTaskMutation()
     const [editMode, setEditMode] = useState<boolean>(false)
     const editInput = useRef<string | null>(null)
@@ -74,12 +74,15 @@ const ToDoItem: React.FC<ToDoItemProps> = ({
                     "dark:text-primary-dark dark:focus:ring-primary-dark dark:accent-primary-dark")}
                 type="checkbox"
                 checked={task.completed}
+                disabled={isCompleting || isIncompleting}
+                aria-label={task.completed ? "Mark as not completed" : "Mark as completed"}
                 onChange={changeTaskState} />
             {editMode ? (
                 <>
                     <input
                         className='flex-1'
                         type="text"
+                        aria-label="Edit task text"
                         defaultValue={task.text}
                         autoFocus={true}
                         onChange={onEditChange}
@@ -102,8 +105,11 @@ const ToDoItem: React.FC<ToDoItemProps> = ({
             )
             }
             <Button
-                type={undefined}
-                className="text-red-500 hover:text-red-700 dark:hover:text-red-400"
+                type="button"
+                aria-label="Delete task"
+                disabled={isDeleting}
+                className={cj("text-red-500 hover:text-red-700 dark:hover:text-red-400",
+                    isDeleting && "opacity-50 cursor-not-allowed")}
                 iconName="remove-bin"
                 onClick={deleteTask} />
         </div >

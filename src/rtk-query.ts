@@ -2,31 +2,25 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import type { BaseQueryApi, BaseQueryExtraOptions, BaseQueryFn, FetchArgs, RetryOptions } from '@reduxjs/toolkit/query/react'
 import type { CreateTask, Task } from './types'
 
+// API base URL is configurable via the VITE_API_URL env var (see .env)
+const baseUrl = import.meta.env.VITE_API_URL ?? 'http://localhost:8080/'
+const baseQuery = fetchBaseQuery({ baseUrl })
+
 /**
- * mechanism for catching errors in the API and displaying them in the console
+ * mechanism for catching errors in the API and logging them; the error is
+ * propagated through RTK Query state so components can render it in the UI
  */
 const baseQueryWithErrorHandling = async (args: string | FetchArgs, api: BaseQueryApi, extraOptions: BaseQueryExtraOptions<BaseQueryFn> & RetryOptions) => {
-  const baseQuery = fetchBaseQuery({ baseUrl: 'http://localhost:8080/' })
-
   try {
-    // Attempt the request
     const result = await baseQuery(args, api, extraOptions)
 
-    // Check for error status codes
     if (result.error) {
-      // Handle specific error codes
-      if (result.error.status === 401) { }
-
-      // Log all errors
       console.error('API error:', result.error)
-      alert(`API error: ${JSON.stringify(result.error)}`)
     }
 
     return result
   } catch (error) {
-    // Handle unexpected errors
     console.error('FETCH error:', error)
-    alert(`FETCH error: ${String(error)}`)
 
     return {
       error: {
@@ -135,10 +129,10 @@ export const todoListApi = createApi({
             'getAllTasks',
             undefined,
             (draft) => {
-              draft = draft.filter(function (item) {
-                return item.id !== id
-              })
-              return draft
+              const i = draft.findIndex((task) => task.id === id)
+              if (i !== -1) {
+                draft.splice(i, 1)
+              }
             }
           )
         )

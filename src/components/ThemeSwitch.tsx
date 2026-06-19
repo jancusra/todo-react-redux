@@ -11,18 +11,15 @@ export type ThemeSwitchProps = {
 const ThemeSwitch: React.FC<ThemeSwitchProps> = ({
     darkAsDefault
 }) => {
-    const [lightTheme, setLightTheme] = useState<boolean>(true)
+    const [lightTheme, setLightTheme] = useState<boolean>(!darkAsDefault)
 
+    // keep the document's `dark` class in sync with the current theme state
     useEffect(() => {
-        if (darkAsDefault) {
-            document.documentElement.classList.toggle('dark')
-            setLightTheme(false)
-        }
-    }, [])
+        document.documentElement.classList.toggle('dark', !lightTheme)
+    }, [lightTheme])
 
     function switchTheme() {
-        document.documentElement.classList.toggle('dark')
-        setLightTheme(!lightTheme)
+        setLightTheme((prev) => !prev)
     }
 
     return (

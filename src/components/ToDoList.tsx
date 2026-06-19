@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { cj } from '../helpers'
+import { cj, filterTasks } from '../helpers'
 import {
     useCreateTaskMutation,
     useCompleteTaskMutation,
@@ -32,18 +32,20 @@ const ToDoList: React.FC<ToDoListProps> = ({
 }) => {
     const { data, error, isLoading } = useGetAllTasksQuery()
     const [completeTaskMut] = useCompleteTaskMutation()
-    const [createTaskMut] = useCreateTaskMutation()
+    const [createTaskMut, { isLoading: isCreating }] = useCreateTaskMutation()
     const [deleteTaskMut] = useDeleteTaskMutation()
     const [filterType, setFilterType] = useState<FilterType>("All");
 
     function addTask(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault()
 
-        const formData = new FormData(e.target as HTMLFormElement)
+        const form = e.currentTarget
+        const formData = new FormData(form)
         const inputRaw = formData.get('todoin')
 
-        if (typeof inputRaw === "string") {
-            createTaskMut({ text: inputRaw })
+        if (typeof inputRaw === "string" && inputRaw.trim()) {
+            createTaskMut({ text: inputRaw.trim() })
+            form.reset()
         }
     }
 
@@ -55,8 +57,8 @@ const ToDoList: React.FC<ToDoListProps> = ({
         const confirmed = confirm("Do you want to complete all visible tasks?");
 
         if (confirmed && data) {
-            data.forEach(entry => {
-                if (filterType !== "Completed" && !entry.completed) {
+            filterTasks(data, filterType).forEach(entry => {
+                if (!entry.completed) {
                     completeTaskMut(entry.id)
                 }
             })
@@ -87,8 +89,10 @@ const ToDoList: React.FC<ToDoListProps> = ({
                     required={true} />
                 <Button
                     type="submit"
-                    innerText="Add"
-                    className="px-4 py-2 bg-primary-light dark:bg-primary-dark text-white rounded-lg hover:opacity-90 transition-opacity" />
+                    innerText={isCreating ? "Adding ..." : "Add"}
+                    disabled={isCreating}
+                    className={cj("px-4 py-2 bg-primary-light dark:bg-primary-dark text-white rounded-lg transition-opacity",
+                        isCreating ? "opacity-60 cursor-not-allowed" : "hover:opacity-90")} />
             </form>
 
             {showFilter && <SelectBox
@@ -97,29 +101,31 @@ const ToDoList: React.FC<ToDoListProps> = ({
                     { value: "Completed", text: "Completed" },
                     { value: "NotCompleted", text: "Not completed" }
                 ]}
+                value={filterType}
                 onChange={changeFilter} />
             }
 
             <div id="todo-list" className="space-y-2">
-                {error ? (
-                    <div className="text-center py-4 text-gray-500 dark:text-gray-400">
-                        No tasks yet. Add one above!
-                    </div>
-                ) : isLoading ? (
+                {isLoading ? (
                     <div className="text-center py-4 text-gray-500 dark:text-gray-400">
                         Loading ...
                     </div>
-                ) : data ? (
-                    <>
-                        {data.map(entry => {
-                            if (filterType === "All" || (filterType === "Completed" && entry.completed) || (filterType === "NotCompleted" && !entry.completed))
-                                return <ToDoItem
-                                    key={entry.id}
-                                    task={entry}
-                                    editNameByDoubleClickEnabled={editNameByDoubleClickEnabled} />
-                        })}
-                    </>
-                ) : null}
+                ) : error ? (
+                    <div className="text-center py-4 text-red-500 dark:text-red-400">
+                        Could not load tasks. Please try again later.
+                    </div>
+                ) : !data || data.length === 0 ? (
+                    <div className="text-center py-4 text-gray-500 dark:text-gray-400">
+                        No tasks yet. Add one above!
+                    </div>
+                ) : (
+                    filterTasks(data, filterType).map(entry =>
+                        <ToDoItem
+                            key={entry.id}
+                            task={entry}
+                            editNameByDoubleClickEnabled={editNameByDoubleClickEnabled} />
+                    )
+                )}
             </div>
 
             {(showCompleted || visibleCanBeMarkedAsCompleted || allCompletedCanBeCleared) && data &&
@@ -132,14 +138,14 @@ const ToDoList: React.FC<ToDoListProps> = ({
 
                     {visibleCanBeMarkedAsCompleted &&
                         <Button
-                            type={undefined}
+                            type="button"
                             innerText="Mark as completed"
                             className="hover:text-primary-light dark:hover:text-primary-dark"
                             onClick={markVisibleAsCompleted} />
                     }
                     {allCompletedCanBeCleared &&
                         <Button
-                            type={undefined}
+                            type="button"
                             innerText="Clear completed"
                             className="hover:text-primary-light dark:hover:text-primary-dark"
                             onClick={clearCompleted} />

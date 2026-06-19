@@ -1,35 +1,27 @@
 import { Icon } from "../Icons"
 
-export type ButtonProps = {
-    readonly type: "submit" | "reset" | "button" | undefined,
+export type ButtonProps = React.ComponentPropsWithoutRef<'button'> & {
     readonly innerText?: string,
-    readonly className?: string,
-    readonly iconName?: string,
-    readonly onClick?: () => void,
-    readonly onMouseDown?: (e: React.MouseEvent<HTMLButtonElement>) => void
+    readonly iconName?: string
 }
 
 /**
- * general button component
+ * general button component; forwards all native button attributes
+ * (disabled, aria-label, title, ...) and renders an optional icon + label
  */
 const Button: React.FC<ButtonProps> = ({
-    type,
     innerText,
-    className,
     iconName,
-    onClick,
-    onMouseDown
+    children,
+    ...rest
 }) => {
     return (
-        <button
-            type={type}
-            className={className}
-            onClick={onClick}
-            onMouseDown={onMouseDown}>
+        <button {...rest}>
             {iconName &&
                 <Icon name={iconName} />
             }
             {innerText}
+            {children}
         </button>
     )
 }
