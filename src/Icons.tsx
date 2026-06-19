@@ -38,9 +38,11 @@ export const Icon: React.FC<IconProps> = ({
             className
         )}
             ref={reference}
-            xmlns="http://www.w3.org/2000/svg"
-            xmlnsXlink="http://www.w3.org/1999/xlink">
-            <use xlinkHref={`#${name}`}></use>
+            // icons are decorative; the interactive element carries the label
+            aria-hidden="true"
+            focusable="false"
+            xmlns="http://www.w3.org/2000/svg">
+            <use href={`#${name}`}></use>
         </svg>
     )
 }

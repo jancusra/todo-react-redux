@@ -8,3 +8,8 @@ button,
 input[type="checkbox"] {
   cursor: pointer;
 }
+
+button:disabled,
+input[type="checkbox"]:disabled {
+  cursor: not-allowed;
+}

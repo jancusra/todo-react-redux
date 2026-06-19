@@ -41,7 +41,7 @@ type OptimisticLifecycle = {
 }
 
 /**
- * shared optimistic-update helper for the toggle/update/delete mutations:
+ * shared optimistic-update helper for the delete mutation:
  * applies `recipe` to the cached task list immediately and, on failure, rolls
  * the change back locally with `patchResult.undo()` (no refetch / no flash)
  */
@@ -53,6 +53,39 @@ function optimisticUpdate(recipe: (draft: Task[]) => void) {
 
     try {
       await queryFulfilled
+    } catch {
+      patchResult.undo()
+    }
+  }
+}
+
+/**
+ * optimistic helper for the single-task mutations that return the updated Task
+ * (update / complete / incomplete): applies `patch` immediately, rolls back on
+ * failure, and on success reconciles the cached task with the server response
+ * (e.g. `completedDate` set by complete / cleared by incomplete)
+ */
+function optimisticTaskMutation(id: string, patch: (task: Task) => void) {
+  return async ({ dispatch, queryFulfilled }: OptimisticLifecycle) => {
+    const patchResult = dispatch(
+      todoListApi.util.updateQueryData('getAllTasks', undefined, (draft) => {
+        const item = draft.find((task) => task.id === id)
+        if (item) {
+          patch(item)
+        }
+      })
+    )
+
+    try {
+      const { data } = (await queryFulfilled) as { data: Task }
+      dispatch(
+        todoListApi.util.updateQueryData('getAllTasks', undefined, (draft) => {
+          const item = draft.find((task) => task.id === data.id)
+          if (item) {
+            Object.assign(item, data)
+          }
+        })
+      )
     } catch {
       patchResult.undo()
     }
@@ -121,7 +154,7 @@ export const todoListApi = createApi({
       }
     }),
     // update a task
-    updateTask: build.mutation<Task, Partial<Task>>({
+    updateTask: build.mutation<Task, { id: string; text: string }>({
       query: (updateTaskQuery) => ({
         // backend exposes text updates as POST /tasks/:id (no PUT handler)
         url: `tasks/${updateTaskQuery.id}`,
@@ -129,11 +162,8 @@ export const todoListApi = createApi({
         body: { text: updateTaskQuery.text }
       }),
       onQueryStarted({ id, ...patch }, api) {
-        return optimisticUpdate((draft) => {
-          const item = draft.find((task) => task.id === id)
-          if (item) {
-            Object.assign(item, patch)
-          }
+        return optimisticTaskMutation(id, (task) => {
+          Object.assign(task, patch)
         })(api)
       }
     }),
@@ -159,11 +189,8 @@ export const todoListApi = createApi({
         method: 'POST'
       }),
       onQueryStarted(id, api) {
-        return optimisticUpdate((draft) => {
-          const item = draft.find((task) => task.id === id)
-          if (item) {
-            item.completed = true
-          }
+        return optimisticTaskMutation(id, (task) => {
+          task.completed = true
         })(api)
       }
     }),
@@ -174,11 +201,8 @@ export const todoListApi = createApi({
         method: 'POST'
       }),
       onQueryStarted(id, api) {
-        return optimisticUpdate((draft) => {
-          const item = draft.find((task) => task.id === id)
-          if (item) {
-            item.completed = false
-          }
+        return optimisticTaskMutation(id, (task) => {
+          task.completed = false
         })(api)
       }
     })

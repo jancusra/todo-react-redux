@@ -35,8 +35,12 @@ const ToDoList: React.FC<ToDoListProps> = ({
     const [createTaskMut, { isLoading: isCreating }] = useCreateTaskMutation()
     const [deleteTaskMut] = useDeleteTaskMutation()
     const [filterType, setFilterType] = useState<FilterType>("All");
+    const [isMarkingAll, setIsMarkingAll] = useState(false)
+    const [isClearing, setIsClearing] = useState(false)
 
     const visibleTasks = data ? filterTasks(data, filterType) : []
+    const markableTasks = visibleTasks.filter(task => !task.completed)
+    const completedTasks = data ? data.filter(task => task.completed) : []
 
     function addTask(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault()
@@ -52,27 +56,29 @@ const ToDoList: React.FC<ToDoListProps> = ({
     }
 
 
-    function markVisibleAsCompleted() {
-        const confirmed = confirm("Do you want to complete all visible tasks?");
+    async function markVisibleAsCompleted() {
+        if (!confirm("Do you want to complete all visible tasks?")) {
+            return
+        }
 
-        if (confirmed) {
-            visibleTasks.forEach(entry => {
-                if (!entry.completed) {
-                    completeTaskMut(entry.id)
-                }
-            })
+        setIsMarkingAll(true)
+        try {
+            await Promise.all(markableTasks.map(entry => completeTaskMut(entry.id).unwrap()))
+        } finally {
+            setIsMarkingAll(false)
         }
     }
 
-    function clearCompleted() {
-        const confirmed = confirm("Do you want to remove all completed tasks?");
+    async function clearCompleted() {
+        if (!confirm("Do you want to remove all completed tasks?")) {
+            return
+        }
 
-        if (confirmed && data) {
-            data.forEach(entry => {
-                if (entry.completed) {
-                    deleteTaskMut(entry.id)
-                }
-            })
+        setIsClearing(true)
+        try {
+            await Promise.all(completedTasks.map(entry => deleteTaskMut(entry.id).unwrap()))
+        } finally {
+            setIsClearing(false)
         }
     }
 
@@ -142,15 +148,19 @@ const ToDoList: React.FC<ToDoListProps> = ({
                     {visibleCanBeMarkedAsCompleted &&
                         <Button
                             type="button"
-                            innerText="Mark as completed"
-                            className="hover:text-primary-light dark:hover:text-primary-dark"
+                            innerText={isMarkingAll ? "Marking ..." : "Mark as completed"}
+                            disabled={isMarkingAll || markableTasks.length === 0}
+                            className={cj("hover:text-primary-light dark:hover:text-primary-dark",
+                                (isMarkingAll || markableTasks.length === 0) && "opacity-50 cursor-not-allowed")}
                             onClick={markVisibleAsCompleted} />
                     }
                     {allCompletedCanBeCleared &&
                         <Button
                             type="button"
-                            innerText="Clear completed"
-                            className="hover:text-primary-light dark:hover:text-primary-dark"
+                            innerText={isClearing ? "Clearing ..." : "Clear completed"}
+                            disabled={isClearing || completedTasks.length === 0}
+                            className={cj("hover:text-primary-light dark:hover:text-primary-dark",
+                                (isClearing || completedTasks.length === 0) && "opacity-50 cursor-not-allowed")}
                             onClick={clearCompleted} />
                     }
                 </div>
