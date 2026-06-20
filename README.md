@@ -1,5 +1,7 @@
 # ToDo List app by React, RTK Query & Tailwind CSS
 
+[![all tests](https://github.com/jancusra/todo-react-redux/actions/workflows/ci.yml/badge.svg)](https://github.com/jancusra/todo-react-redux/actions/workflows/ci.yml)
+
 [Here is the server API for this application](https://github.com/morosystems/todo-be)
 ###
 The app has one page with a list of tasks. Any changes to the list are reflected on the backend, which can be found at https://github.com/morosystems/todo-be (see its readme file for instructions on how to get it running).
